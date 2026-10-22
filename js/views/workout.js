@@ -47,7 +47,7 @@ async function paint(body, id) {
     ${x.warmup ? `<div class="wblock"><div class="eyebrow">${esc(t('wo.warmup'))}</div>${esc(x.warmup)}</div>` : ''}
     ${x.main ? `<div class="wblock main"><div class="eyebrow red">${esc(t('wo.main'))}</div>${esc(x.main)}</div>` : ''}
     ${x.cooldown ? `<div class="wblock"><div class="eyebrow">${esc(t('wo.cooldown'))}</div>${esc(x.cooldown)}</div>` : ''}
-    ${x.coach ? `<div class="card" style="margin-top:16px"><div class="row" style="align-items:flex-start">${icon('coach', 'width="22" height="22" style="flex:none;color:var(--red)"')}
+    ${x.coach ? `<div class="card" style="margin-top:16px"><div class="row" style="align-items:flex-start">${icon('coach', 'width="22" height="22" style="flex:none;color:var(--accent)"')}
       <div><div class="eyebrow">${esc(t('wo.coach'))}</div><div style="margin-top:4px">${esc(x.coach)}</div></div></div></div>` : ''}
     ${tp.video_url ? video(tp.video_url) : ''}
 
@@ -68,7 +68,7 @@ async function paint(body, id) {
     </div>`);
 
   on(root, '[data-log]', 'click', () => go('log?sw=' + s.id));
-  on(root, '[data-gps]', 'click', () => go('gps?sw=' + s.id));
+  on(root, '[data-gps]', 'click', () => go('run?sw=' + s.id));
   on(root, '[data-skip]', 'click', async () => {
     if (!await confirmSheet(t('wo.skipQ'), t('wo.skipHelp'), t('wo.skip'))) return;
     try { await api.updateSession(s.id, { status: 'skipped' }); toast(t('wo.skipped')); await paint(body, id); } catch (e) { toast(friendlyError(e)); }

@@ -64,7 +64,7 @@ function chart(series) {
   const max = Math.max(...series.map(s => s.dist), 1000), W = 320, H = 140, gap = 8, bw = (W - gap * (series.length - 1)) / series.length;
   return `<svg viewBox="0 0 ${W} ${H}" role="img">${series.map((s, i) => {
     const h = s.dist > 0 ? Math.max(4, (H - 26) * s.dist / max) : 3, x = i * (bw + gap), last = i === series.length - 1;
-    return `<rect x="${x.toFixed(1)}" y="${(H - 20 - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${s.dist > 0 ? (last ? 'var(--red)' : 'var(--text)') : 'var(--surface-2)'}"><title>${km(s.dist, 1)} km</title></rect>
+    return `<rect x="${x.toFixed(1)}" y="${(H - 20 - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${s.dist > 0 ? (last ? 'var(--accent)' : 'var(--text)') : 'var(--surface-2)'}"><title>${km(s.dist, 1)} km</title></rect>
       <text x="${(x + bw / 2).toFixed(1)}" y="${H - 5}" font-size="10" fill="var(--faint)" text-anchor="middle">${esc(fmtDate(s.start, { day: 'numeric', month: 'numeric' }))}</text>`; }).join('')}</svg>`;
 }
 

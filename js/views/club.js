@@ -76,12 +76,12 @@ export async function event(view, id) {
       <h1 style="margin:6px 0 12px">${esc(e.title)}</h1>
       ${e.status === 'cancelled' ? `<div class="notice" style="margin-bottom:12px"><b>${esc(t('club.cancelled'))}.</b> ${esc(t('club.cancelledHelp'))}</div>` : ''}
       <div class="card list">
-        <div class="row">${icon('calendar', 'width="20" height="20" style="flex:none;color:var(--red)"')}<div><div style="font-weight:700">${esc(fmtDateLong(e.starts_at))}</div><div class="muted small">${esc(fmtTime(e.starts_at))} · ${esc(t('wo.mins', { n: e.duration_min }))}</div></div></div>
-        <div class="row">${icon('pin', 'width="20" height="20" style="flex:none;color:var(--red)"')}<div class="grow"><div style="font-weight:700">${esc(e.meeting_point)}</div>
+        <div class="row">${icon('calendar', 'width="20" height="20" style="flex:none;color:var(--accent)"')}<div><div style="font-weight:700">${esc(fmtDateLong(e.starts_at))}</div><div class="muted small">${esc(fmtTime(e.starts_at))} · ${esc(t('wo.mins', { n: e.duration_min }))}</div></div></div>
+        <div class="row">${icon('pin', 'width="20" height="20" style="flex:none;color:var(--accent)"')}<div class="grow"><div style="font-weight:700">${esc(e.meeting_point)}</div>
           ${e.map_url ? `<a class="link small" href="${esc(e.map_url)}" target="_blank" rel="noopener">${esc(t('club.openMap'))}</a>` : ''}</div></div>
-        ${e.distance_text || e.pace_groups ? `<div class="row">${icon('route', 'width="20" height="20" style="flex:none;color:var(--red)"')}<div>${e.distance_text ? `<div style="font-weight:700">${esc(e.distance_text)}</div>` : ''}${e.pace_groups ? `<div class="muted small">${esc(t('club.paceGroups'))}: ${esc(e.pace_groups)}</div>` : ''}</div></div>` : ''}
-        ${e.leader_name ? `<div class="row">${icon('coach', 'width="20" height="20" style="flex:none;color:var(--red)"')}<div><div class="muted small">${esc(t('club.leader'))}</div><div style="font-weight:700">${esc(e.leader_name)}</div></div></div>` : ''}
-        <div class="row">${icon('people', 'width="20" height="20" style="flex:none;color:var(--red)"')}<div>${esc(t('club.goingN', { n }))}${left != null ? ` · ${esc(t('club.spots', { n: left }))}` : ''}</div></div>
+        ${e.distance_text || e.pace_groups ? `<div class="row">${icon('route', 'width="20" height="20" style="flex:none;color:var(--accent)"')}<div>${e.distance_text ? `<div style="font-weight:700">${esc(e.distance_text)}</div>` : ''}${e.pace_groups ? `<div class="muted small">${esc(t('club.paceGroups'))}: ${esc(e.pace_groups)}</div>` : ''}</div></div>` : ''}
+        ${e.leader_name ? `<div class="row">${icon('coach', 'width="20" height="20" style="flex:none;color:var(--accent)"')}<div><div class="muted small">${esc(t('club.leader'))}</div><div style="font-weight:700">${esc(e.leader_name)}</div></div></div>` : ''}
+        <div class="row">${icon('people', 'width="20" height="20" style="flex:none;color:var(--accent)"')}<div>${esc(t('club.goingN', { n }))}${left != null ? ` · ${esc(t('club.spots', { n: left }))}` : ''}</div></div>
       </div>
       ${e.description ? `<h2>${esc(t('club.instructions'))}</h2><p style="margin:0;white-space:pre-line">${esc(e.description)}</p>` : ''}
       <div class="error" id="e-err" role="alert"></div>

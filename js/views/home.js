@@ -71,7 +71,7 @@ async function paint(body) {
 
     <h2>${esc(t('home.milestones'))}</h2>
     ${earned.length ? `<div class="card"><div class="row wrap" style="gap:16px">${earned.slice(-4).reverse().map(e => { const b = byCode(e.code); return b ? `<div class="row" style="gap:10px;min-width:45%">
-        <div class="icon-btn" style="background:var(--red);color:#fff">${icon(b.icon)}</div><div><div style="font-weight:700">${esc(b[lang()][0])}</div><div class="muted tiny">${esc(fmtDate(e.earned_at))}</div></div></div>` : ''; }).join('')}</div>
+        <div class="icon-btn" style="background:var(--accent);color:var(--accent-ink)">${icon(b.icon)}</div><div><div style="font-weight:700">${esc(b[lang()][0])}</div><div class="muted tiny">${esc(fmtDate(e.earned_at))}</div></div></div>` : ''; }).join('')}</div>
         <a class="link small" href="#/profile" style="display:inline-block;margin-top:12px">${esc(t('home.allBadges'))}</a></div>`
       : `<div class="card muted">${esc(t('home.noBadges'))}</div>`}
 

@@ -69,7 +69,7 @@ function form(body, { sess, existing, gps }) {
   };
   const showPace = () => { const { d, s } = val(); root.querySelector('#lf-pace').textContent = d > 0 && s > 0 ? t('log.paceIs', { p: pace(paceOf(s, d)) }) : ' '; };
   root.addEventListener('input', showPace); showPace();
-  on(root, '[data-gps]', 'click', () => go('gps' + (sess ? '?sw=' + sess.id : '')));
+  on(root, '[data-gps]', 'click', () => go('run' + (sess ? '?sw=' + sess.id : '')));
 
   root.querySelector('#log-form').addEventListener('submit', async e => {
     e.preventDefault();

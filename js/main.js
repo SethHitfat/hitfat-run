@@ -24,11 +24,11 @@ const ROUTES = [
   [/^settings$/, () => import('./views/profile.js'), 'settings'],
   [/^onboarding$/, () => import('./views/onboarding.js')],
   [/^review$/, () => import('./views/programs.js'), 'review'],
-  [/^gps$/, () => import('./views/gps.js')],
+  [/^(run|gps)$/, () => import('./views/run.js')],
 ];
-const TABS = [['home', 'home'], ['training', 'training'], ['club', 'club'], ['profile', 'profile']];
+const TABS = [['home', 'home'], ['training', 'training'], ['run', 'run'], ['club', 'club'], ['profile', 'profile']];
 const TAB_OF = { home: 'home', training: 'training', programs: 'training', program: 'training', review: 'training', workout: 'training',
-  club: 'club', event: 'club', profile: 'profile', history: 'profile', settings: 'profile', activity: 'profile', log: 'home', gps: 'home' };
+  club: 'club', event: 'club', profile: 'profile', history: 'profile', settings: 'profile', activity: 'profile', log: 'home', run: 'run', gps: 'run' };
 
 export function go(path, replace) {
   const h = '#/' + path.replace(/^#?\/?/, '');
@@ -40,7 +40,7 @@ export function back(fallback) { if (history.length > 1) history.back(); else go
 function paintTabs(current) {
   const nav = $('#tabs');
   nav.innerHTML = `<div class="wordmark">HITFAT <b>RUN</b></div>` + TABS.map(([k, ic]) =>
-    `<button data-tab="${k}" ${current === k ? 'aria-current="page"' : ''}>${icon(ic)}<span>${esc(t('tab.' + k))}</span></button>`).join('');
+    `<button data-tab="${k}" ${k === 'run' ? 'class="run-tab"' : ''} ${current === k ? 'aria-current="page"' : ''}>${k === 'run' ? `<span class="dot">${icon(ic)}</span>` : icon(ic)}<span>${esc(t('tab.' + k))}</span></button>`).join('');
   nav.classList.remove('hide');
 }
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) go(b.dataset.tab); });

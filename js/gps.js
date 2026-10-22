@@ -19,11 +19,13 @@ export const JUMP_MS = 9;       // faster than this is a GPS jump, not a runner
 const LIVE_KEY = 'hfrun_gps_live';
 
 export class Tracker {
-  constructor(onUpdate) { this.onUpdate = onUpdate; this.s = null; this.watch = null; this.wake = null; this.lastFix = null; }
+  /** hooks: onSplit(km, seconds), onAutoPause(paused) */
+  constructor(onUpdate, hooks = {}) { this.onUpdate = onUpdate; this.hooks = hooks; this.autoPause = false; this.s = null; this.watch = null; this.wake = null; this.lastFix = null; }
   get active() { return !!this.s; }
-  begin(sw) {
+  /** extra: what this run is for (goal, session plan), saved with it so a restored run carries on */
+  begin(sw, extra = {}) {
     this.s = { id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), sw: sw || null, status: 'running', start: Date.now(),
-      acc: 0, resumeAt: Date.now(), dist: 0, pts: [], trace: [], splits: [], last: null, gaps: 0 };
+      acc: 0, resumeAt: Date.now(), dist: 0, pts: [], trace: [], splits: [], last: null, gaps: 0, ...extra };
     this.startWatch(); this.keepAwake(); this.persist();
   }
   restore(saved) { this.s = { ...saved, status: 'paused', last: null }; this.startWatch(); this.keepAwake(); }
@@ -39,11 +41,16 @@ export class Tracker {
     const s = this.s; if (!s) return;
     const c = p.coords, pt = [c.latitude, c.longitude], acc = c.accuracy || 99, now = Date.now();
     this.lastFix = { pt, acc, t: now }; this.error = null;
+    if (s.status === 'paused' && s.autoPaused && s.pauseAt && acc <= ACC_MAX && haversine(s.pauseAt, pt) > 12) this.resume(true);
     if (s.status !== 'running' || acc > ACC_MAX) { this.onUpdate(); return; }
     const e = this.elapsed() / 1000;
     if (!s.last) { s.last = { pt, t: now }; s.pts.push(pt); s.trace.push([+e.toFixed(1), +s.dist.toFixed(1)]); this.onUpdate(); return; }
     const d = haversine(s.last.pt, pt), dt = (now - s.last.t) / 1000;
-    if (d < Math.max(3, acc * 0.25)) { this.onUpdate(); return; }        // jitter: wait until real movement adds up
+    if (d < Math.max(3, acc * 0.25)) {                                   // jitter: wait until real movement adds up
+      if (this.autoPause) { s.stillSince = s.stillSince || now; if (now - s.stillSince > 10000) { s.pauseAt = s.last.pt; this.pause(true); } }
+      this.onUpdate(); return;
+    }
+    s.stillSince = 0;
     if (dt > 0 && d / dt > JUMP_MS) { this.onUpdate(); return; }        // a jump, not running
     if (dt > 30) s.gaps++;                                                // signal was lost for a while; counted, not filled
     const prevD = s.dist, prevE = s.trace.length ? s.trace[s.trace.length - 1][0] : 0;
@@ -51,6 +58,7 @@ export class Tracker {
     while (s.dist >= (s.splits.length + 1) * 1000) {                     // km splits, interpolated to the crossing
       const mark = (s.splits.length + 1) * 1000, f = (mark - prevD) / (s.dist - prevD || 1), atE = prevE + (e - prevE) * f;
       s.splits.push(Math.round(atE - s.splits.reduce((a, b) => a + b, 0)));
+      this.hooks.onSplit && this.hooks.onSplit(s.splits.length, s.splits[s.splits.length - 1]);
     }
     this.persist(); this.onUpdate();
   }
@@ -62,8 +70,10 @@ export class Tracker {
     const dd = last[1] - tr[i][1], de = last[0] - tr[i][0];
     return dd < 15 || this.elapsed() / 1000 - last[0] > 12 ? NaN : de / (dd / 1000);
   }
-  pause() { const s = this.s; if (!s || s.status !== 'running') return; s.acc += Date.now() - s.resumeAt; s.status = 'paused'; s.last = null; this.persist(); this.onUpdate(); }
-  resume() { const s = this.s; if (!s || s.status !== 'paused') return; s.status = 'running'; s.resumeAt = Date.now(); this.onUpdate(); }
+  pause(auto) { const s = this.s; if (!s || s.status !== 'running') return; s.acc += Date.now() - s.resumeAt; s.status = 'paused'; s.autoPaused = !!auto; s.last = null;
+    this.persist(); this.hooks.onAutoPause && auto && this.hooks.onAutoPause(true); this.onUpdate(); }
+  resume(auto) { const s = this.s; if (!s || s.status !== 'paused') return; s.status = 'running'; s.resumeAt = Date.now(); s.autoPaused = false; s.stillSince = 0;
+    this.hooks.onAutoPause && auto && this.hooks.onAutoPause(false); this.onUpdate(); }
   persist() { const s = this.s; if (!s) return; try { localStorage.setItem(LIVE_KEY, JSON.stringify({ ...s, acc: this.elapsed(), status: 'paused', savedAt: Date.now() })); } catch (e) {} }
   static recoverable() { try { const r = JSON.parse(localStorage.getItem(LIVE_KEY) || 'null'); if (r && Date.now() - r.savedAt < 6 * 36e5) return r; } catch (e) {} return null; }
   static discard() { try { localStorage.removeItem(LIVE_KEY); } catch (e) {} }
