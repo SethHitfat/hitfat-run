@@ -23,7 +23,7 @@ const pw = await import(process.env.PLAYWRIGHT || 'playwright'), { chromium } = 
 const psql = (sql, db = DB) => execFileSync('psql', ['-qAtX', '-v', 'ON_ERROR_STOP=1', '-d', db, '-c', sql], { encoding: 'utf8' }).trim();
 const psqlFile = f => execFileSync('psql', ['-qX', '-v', 'ON_ERROR_STOP=1', '-d', DB, '-f', f], { stdio: ['ignore', 'ignore', 'pipe'] });
 psql(`drop database if exists ${DB} with (force)`, 'postgres'); psql(`create database ${DB}`, 'postgres');
-for (const f of ['db/tests/supabase_stub.sql', 'db/001_run_club_phase1.sql', 'db/002_seed_programs.sql']) psqlFile(join(RUN, f));
+for (const f of ['db/tests/supabase_stub.sql', 'db/001_run_club_phase1.sql', 'db/002_seed_programs.sql', 'db/003_strength.sql']) psqlFile(join(RUN, f));
 psql(`grant usage on schema public to anon, authenticated; grant select on all tables in schema public to authenticated;`);
 
 const users = new Map();   // email → { id, password, meta }
@@ -225,6 +225,16 @@ try {
   await ctx.setOffline(false); networkDown = false; await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await page.waitForTimeout(1500);
   check(psql(`select count(*) from run_activities`) === '2', 'offline run synced once back online');
+
+  // a strength session goes to its own private table and counts on Home
+  const nStr = await page.evaluate(async () => { const api = await import('/js/api.js'); try {
+      await api.saveStrength({ id: crypto.randomUUID(), workout_key: 'kaki-pelari', started_at: new Date().toISOString(), duration_s: 1150, moves_done: 18, rpe: 6 });
+      return (await api.listStrength()).length; } catch (e) { return JSON.stringify(e); } }).catch(e => { console.error('strength', e.message); return -1; });
+  if (nStr !== 1) console.error('strength save:', nStr);
+  check(nStr === 1 && psql(`select count(*) from run_strength_logs`) === '1', 'strength session saved and read back');
+  await page.evaluate(() => { location.hash = '#/club'; }); await page.waitForSelector('[data-tab=club][aria-current=page]');
+  await page.click('[data-tab=home]'); await page.waitForSelector('text=1/2 minggu ini');
+  check(true, 'home counts the strength session this week');
 
   // English, dark theme, desktop
   await page.evaluate(() => { location.hash = '#/settings'; }); await page.waitForSelector('[data-lang=en]');

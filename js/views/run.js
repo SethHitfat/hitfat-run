@@ -97,11 +97,11 @@ function start(view, session) {
     if (!root.isConnected) return;
     preMap = baseMap(L, root.querySelector('#pre-map'), false);
     if ('geolocation' in navigator) warm = navigator.geolocation.watchPosition(p => {
-      const acc = p.coords.accuracy, el = root.querySelector('#pre-acc'); if (!el) return;
+      const acc = p.coords.accuracy, el = root.querySelector('#pre-acc'); if (!el || !preMap) return;
       el.className = 'acc ' + (acc <= 15 ? 'good' : acc <= ACC_MAX ? 'ok' : 'bad');
       el.querySelector('span').textContent = t('gps.accuracy', { m: Math.round(acc) });
       const pt = [p.coords.latitude, p.coords.longitude];
-      if (!preMap._me) { preMap._me = L.circleMarker(pt, { radius: 8, color: '#000', weight: 3, fillColor: '#FFE000', fillOpacity: 1 }).addTo(preMap); preMap.setView(pt, 16); }
+      if (!preMap._me) { preMap._me = L.circleMarker(pt, { radius: 8, color: '#000', weight: 3, fillColor: '#FFE000', fillOpacity: 1 }).addTo(preMap); preMap.setView(pt, 16, { animate: false }); }
       else preMap._me.setLatLng(pt);
     }, () => { const el = root.querySelector('#pre-acc'); if (el) { el.className = 'acc bad'; el.querySelector('span').textContent = t('gps.denied'); } },
     { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
@@ -248,7 +248,7 @@ async function toggleMap(root) {
   root.querySelector('.main').classList.toggle('compact', !box.classList.contains('hide'));
   if (box.classList.contains('hide') || map) { map && map.invalidateSize(); return; }
   try { const L = await loadLeaflet(); map = baseMap(L, box, true); line = L.polyline(tracker.s.pts, { color: '#FFE000', weight: 5 }).addTo(map);
-    if (tracker.lastFix) map.setView(tracker.lastFix.pt, 16); }
+    if (tracker.lastFix) map.setView(tracker.lastFix.pt, 16, { animate: false }); }
   catch (e) { box.classList.add('hide'); toast(t('gps.noMap')); }
 }
 

@@ -119,7 +119,8 @@ export async function flushOutbox() {
   for (const item of readBox()) {
     if (item.user_id !== session.user.id) { left.push(item); continue; }
     try {
-      must(await sb.from('run_activities').upsert(item.row, { onConflict: 'id' }));
+      if (item.table === STR) await insertStrength(item.row);
+      else must(await sb.from('run_activities').upsert(item.row, { onConflict: 'id' }));
       if (item.link) await updateSession(item.link.id, { ...item.link.patch, activity_id: item.row.id });
       sent++;
     } catch (e) { left.push(item); }
@@ -131,7 +132,7 @@ export async function listActivities({ since, limit = 200 } = {}) {
   const all = await cached('acts', async () => must(await sb.from('run_activities')
     .select('id,source,started_at,distance_m,moving_time_s,elapsed_time_s,avg_pace_s_km,rpe,avg_hr,workout_type,title,notes,scheduled_workout_id')
     .eq('user_id', uid()).order('started_at', { ascending: false }).limit(1000)));
-  const queued = readBox().filter(x => x.user_id === uid()).map(x => ({ ...x.row, queued: true, avg_pace_s_km: Math.round(x.row.moving_time_s * 1000 / x.row.distance_m) }));
+  const queued = readBox().filter(x => x.user_id === uid() && !x.table).map(x => ({ ...x.row, queued: true, avg_pace_s_km: Math.round(x.row.moving_time_s * 1000 / x.row.distance_m) }));
   return [...queued.filter(q => !all.some(r => r.id === q.id)), ...all]
     .filter(a => !since || Date.parse(a.started_at) >= new Date(since).getTime())
     .sort((a, b) => b.started_at.localeCompare(a.started_at)).slice(0, limit);
@@ -147,6 +148,28 @@ export async function findDuplicate(startedAt, distanceM, ignoreId) {
   const rows = must(await sb.from('run_activities').select('id,started_at,distance_m,moving_time_s').eq('user_id', uid())
     .gte('started_at', from.toISOString()).lt('started_at', to.toISOString()));
   return rows.find(r => r.id !== ignoreId && Math.abs(r.distance_m - distanceM) <= distanceM * 0.03) || null;
+}
+
+/* ───────── strength sessions (same outbox; a log is saved or removed, never edited) ───────── */
+const STR = 'run_strength_logs';
+// insert, not upsert (that needs UPDATE, which runners don't have); the same id twice means it was already saved
+async function insertStrength(row) { const { error } = await sb.from(STR).insert(row); if (error && error.code !== '23505') throw error; }
+export async function saveStrength(log) {
+  const row = { ...log, user_id: uid() };
+  try { await insertStrength(row); return { saved: row, queued: false }; }
+  catch (e) {
+    if (!isNetErr(e)) throw e;
+    writeBox([...readBox().filter(x => x.row.id !== row.id), { table: STR, row, user_id: row.user_id }]);
+    return { saved: row, queued: true };
+  }
+}
+export async function listStrength({ since } = {}) {
+  const all = await cached('str', async () => must(await sb.from(STR).select('id,workout_key,started_at,duration_s,moves_done,rpe')
+    .eq('user_id', uid()).order('started_at', { ascending: false }).limit(500)));
+  const queued = readBox().filter(x => x.user_id === uid() && x.table === STR).map(x => ({ ...x.row, queued: true }));
+  return [...queued.filter(q => !all.some(r => r.id === q.id)), ...all]
+    .filter(a => !since || Date.parse(a.started_at) >= new Date(since).getTime())
+    .sort((a, b) => b.started_at.localeCompare(a.started_at));
 }
 
 /* ───────── achievements ───────── */

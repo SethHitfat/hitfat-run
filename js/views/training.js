@@ -4,6 +4,9 @@ import { state, go, isStaff } from '../main.js';
 import { t, L } from '../i18n.js';
 import { esc, on, mount, icon, photoFor, bg, today, fmtDate, fmtDateLong, weekdayName, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
 import { planProgress } from '../stats.js';
+import { rail } from './strength.js';
+
+const strengthRail = () => `<h2 class="row between"><span>${esc(t('st.title'))}</span><a class="link small" href="#/strength" style="font-family:var(--font)">${esc(t('st.all'))}</a></h2>${rail()}`;
 
 export const sessionTitle = s => L(s.template.i18n).title;
 export function sessionMeta(tp) {
@@ -31,7 +34,7 @@ export async function render(view) {
 async function paint(body) {
   const plan = await api.activePlan();
   if (!plan) {
-    body.innerHTML = `<div class="card">${emptyState(t('train.none'), t('train.noneHelp'), `<a class="btn primary" href="#/programs">${esc(t('home.choosePlan'))}</a>`)}</div>`;
+    body.innerHTML = `<div class="card">${emptyState(t('train.none'), t('train.noneHelp'), `<a class="btn primary" href="#/programs">${esc(t('home.choosePlan'))}</a>`)}</div>${strengthRail()}`;
     return;
   }
   const pp = planProgress(plan), td = today();
@@ -52,6 +55,7 @@ async function paint(body) {
       <button class="btn sm ghost" data-resched>${esc(t('plan.reschedule'))}</button>
       <button class="btn sm ghost danger" data-stop>${esc(t('train.stop'))}</button>
     </div>
+    ${strengthRail()}
     ${Object.keys(byWeek).map(w => `<section class="wk"><h3><span>${esc(t('plan.week', { w }))}</span>
         <span class="muted small" style="font-family:var(--font);text-transform:none">${byWeek[w].filter(s => s.status === 'completed').length}/${byWeek[w].length}</span></h3>
       ${byWeek[w].map(s => {

@@ -23,4 +23,5 @@ export const clearCache = fwd('clearCache'), signInGoogle = fwd('signInGoogle'),
   listAchievements = fwd('listAchievements'), listChapters = fwd('listChapters'), myChapters = fwd('myChapters'), joinChapter = fwd('joinChapter'),
   leaveChapter = fwd('leaveChapter'), listEvents = fwd('listEvents'), getEvent = fwd('getEvent'), eventCounts = fwd('eventCounts'),
   myRegistrations = fwd('myRegistrations'), myRunHistory = fwd('myRunHistory'), rsvp = fwd('rsvp'), createEvent = fwd('createEvent'),
-  updateEvent = fwd('updateEvent'), guestList = fwd('guestList'), deleteMyRunData = fwd('deleteMyRunData');
+  updateEvent = fwd('updateEvent'), guestList = fwd('guestList'), deleteMyRunData = fwd('deleteMyRunData'),
+  saveStrength = fwd('saveStrength'), listStrength = fwd('listStrength');

@@ -180,6 +180,19 @@ reset role; set role anon;
 select t.expect_error($q$ select count(*) from run_programs $q$, '42501');
 select t.expect_error($q$ select run_rsvp('20000000-0000-0000-0000-000000000001', true) $q$, '42501');
 
+-- ── 8b. strength logs are private to their owner and never rewritten ──
+reset role; set role authenticated;
+select t.as_user('00000000-0000-0000-0000-00000000000a');
+insert into run_strength_logs(id, workout_key, started_at, duration_s, rpe) values ('40000000-0000-0000-0000-00000000000a', 'kaki-pelari', now(), 1200, 6);
+select t.expect_error($q$ insert into run_strength_logs(id, user_id, workout_key, started_at, duration_s) values (gen_random_uuid(), '00000000-0000-0000-0000-00000000000b', 'core-pelari', now(), 600) $q$, '42501');
+select t.expect_error($q$ insert into run_strength_logs(id, workout_key, started_at, duration_s) values (gen_random_uuid(), 'Bad Key!', now(), 600) $q$, '23514');
+select t.expect_error($q$ update run_strength_logs set duration_s = 9999 $q$, '42501');
+select t.as_user('00000000-0000-0000-0000-00000000000b');
+insert into run_strength_logs(id, workout_key, started_at, duration_s) values ('40000000-0000-0000-0000-00000000000b', 'core-pelari', now(), 700);
+do $$ begin assert (select count(*) from run_strength_logs) = 1, 'runner sees someone else''s strength log'; end $$;
+reset role; set role anon;
+select t.expect_error($q$ select count(*) from run_strength_logs $q$, '42501');
+
 -- ── 9. delete my data removes every HITFAT RUN row for the caller only ──
 reset role; set role authenticated;
 select t.as_user('00000000-0000-0000-0000-00000000000a');
@@ -190,6 +203,8 @@ do $$ begin
   assert (select count(*) from run_scheduled_workouts where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'calendar left';
   assert (select count(*) from run_profiles where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'profile left';
   assert (select count(*) from run_user_achievements where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'achievements left';
+  assert (select count(*) from run_strength_logs where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'strength logs left';
+  assert (select count(*) from run_strength_logs where user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'deleted someone else''s strength log';
   assert (select count(*) from run_event_registrations where user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'deleted someone else''s data';
   assert exists(select 1 from auth.users where id = '00000000-0000-0000-0000-00000000000a'), 'shared account removed';
 end $$;

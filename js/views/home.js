@@ -6,6 +6,8 @@ import { esc, on, mount, icon, photoFor, bg, km, durWords, fmtDate, fmtTime, tod
 import { thisWeek, consistency, planProgress } from '../stats.js';
 import { byCode } from '../achievements.js';
 import { sessionTitle, sessionMeta } from './training.js';
+import { card as strengthCard, suggestion, WEEK_TARGET } from './strength.js';
+import { startOfWeek } from '../ui.js';
 
 export async function render(view) {
   const h = new Date().getHours();
@@ -22,8 +24,9 @@ export async function render(view) {
 
 async function paint(body) {
   const since = Date.now() - 35 * 864e5;
-  const [plan, acts, earned, chapters] = await Promise.all([
+  const [plan, acts, earned, chapters, str] = await Promise.all([
     api.activePlan(), api.listActivities({ since }), api.listAchievements(), api.myChapters().catch(() => []),
+    api.listStrength({ since: startOfWeek() }).catch(() => []),
   ]);
   const events = await api.listEvents({ chapterId: chapters[0]?.chapter_id, limit: 1 }).catch(() => []);
   const ev = events[0] || null;
@@ -48,6 +51,9 @@ async function paint(body) {
         <a class="btn primary" href="#/programs" style="align-self:flex-start">${esc(t('home.choosePlan'))}</a></div></div>`}
 
     ${plan ? todayCard(plan, pp) : ''}
+
+    <h2 class="row between"><span>${esc(t('st.forRunners'))}</span><span class="chip ${str.length >= WEEK_TARGET ? 'ok' : ''}" style="font-family:var(--font)">${esc(t('st.weekCount', { n: str.length, of: WEEK_TARGET }))}</span></h2>
+    ${strengthCard(suggestion(!!(pp && pp.next && pp.next.scheduled_date === today())), 'mid')}
 
     <h2>${esc(t('home.week'))}</h2>
     <div class="card">

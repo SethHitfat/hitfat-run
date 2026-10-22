@@ -25,10 +25,13 @@ const ROUTES = [
   [/^onboarding$/, () => import('./views/onboarding.js')],
   [/^review$/, () => import('./views/programs.js'), 'review'],
   [/^(run|gps)$/, () => import('./views/run.js')],
+  [/^strength$/, () => import('./views/strength.js')],
+  [/^strength\/([\w-]+)$/, () => import('./views/strength.js'), 'detail'],
+  [/^strength\/([\w-]+)\/play$/, () => import('./views/strength.js'), 'play'],
 ];
 const TABS = [['home', 'home'], ['training', 'training'], ['run', 'run'], ['club', 'club'], ['profile', 'profile']];
 const TAB_OF = { home: 'home', training: 'training', programs: 'training', program: 'training', review: 'training', workout: 'training',
-  club: 'club', event: 'club', profile: 'profile', history: 'profile', settings: 'profile', activity: 'profile', log: 'home', run: 'run', gps: 'run' };
+  club: 'club', event: 'club', profile: 'profile', history: 'profile', settings: 'profile', activity: 'profile', log: 'home', run: 'run', gps: 'run', strength: 'training' };
 
 export function go(path, replace) {
   const h = '#/' + path.replace(/^#?\/?/, '');

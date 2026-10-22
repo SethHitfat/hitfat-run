@@ -114,6 +114,10 @@ export async function saveActivity(act, link) {
   save(); return { saved: withPace(row), queued: false };
 }
 export const flushOutbox = async () => 0;
+export async function saveStrength(log) { db.strength = (db.strength || []).filter(x => x.id !== log.id).concat({ ...log, user_id: USER.id }); save(); return { saved: clone(log), queued: false }; }
+export async function listStrength({ since } = {}) {
+  return clone((db.strength || []).filter(a => !since || Date.parse(a.started_at) >= new Date(since).getTime()).sort((a, b) => b.started_at.localeCompare(a.started_at)));
+}
 export const pendingCount = () => 0;
 export async function listActivities({ since, limit = 200 } = {}) {
   return db.activities.filter(a => !since || Date.parse(a.started_at) >= new Date(since).getTime())

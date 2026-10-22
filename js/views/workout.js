@@ -50,6 +50,9 @@ async function paint(body, id) {
     ${x.coach ? `<div class="card" style="margin-top:16px"><div class="row" style="align-items:flex-start">${icon('coach', 'width="22" height="22" style="flex:none;color:var(--accent)"')}
       <div><div class="eyebrow">${esc(t('wo.coach'))}</div><div style="margin-top:4px">${esc(x.coach)}</div></div></div></div>` : ''}
     ${tp.video_url ? video(tp.video_url) : ''}
+    ${isRun && s.status === 'planned' ? `<a class="card row tap" href="#/strength/panas-badan" style="display:flex;margin-top:16px;text-decoration:none">
+      <img src="/img/mv/1218622513.jpg" alt="" width="40" height="70" style="border-radius:10px;object-fit:cover;flex:none">
+      <div class="grow"><div style="font-weight:800">${esc(t('st.warmFirst'))}</div><div class="muted small">${esc(t('st.warmFirstHelp'))}</div></div>${icon('chevron')}</a>` : ''}
 
     <div style="margin-top:24px">
     ${s.status === 'planned' ? `

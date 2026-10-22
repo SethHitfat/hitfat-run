@@ -12,6 +12,7 @@ let supabaseCalls = 0;
 await ctx.route('https://auth.hitfat.io/**', r => { supabaseCalls++; r.abort(); });
 await ctx.route(`${ORIGIN}/**`, r => { let p = new URL(r.request().url()).pathname; if (p.endsWith('/')) p += 'index.html';
   const f = join(ROOT, p); return existsSync(f) ? r.fulfill({ status: 200, contentType: TYPES[extname(f)] || 'application/octet-stream', body: readFileSync(f) }) : r.fulfill({ status: 404 }); });
+await ctx.route('https://player.vimeo.com/**', r => r.fulfill({ status: 200, contentType: 'text/html', body: '<html><body style="background:#222"></body></html>' }));
 // a fake GPS that runs north at ~6.6 m/s, one fix a second
 await ctx.addInitScript(() => {
   let lat = 6.1254, n = 0; const subs = new Map();
@@ -21,7 +22,7 @@ await ctx.addInitScript(() => {
     getCurrentPosition(ok) { ok({ coords: { latitude: lat, longitude: 102.2386, accuracy: 6 }, timestamp: Date.now() }); } } });
 });
 const page = await ctx.newPage(); page.setDefaultTimeout(12000);
-const shot = n => page.screenshot({ path: join(process.env.SHOTS || '/tmp', `pv-${n}.png`) });
+const shot = async n => { await page.waitForTimeout(500); return page.screenshot({ path: join(process.env.SHOTS || '/tmp', `pv-${n}.png`) }); };
 const errors = []; page.on('pageerror', e => errors.push(e.message));
 let failed = 0; const check = (ok, what) => { console.log(`${ok ? '✓' : '✗'} ${what}`); if (!ok) failed++; };
 try {
@@ -65,6 +66,30 @@ try {
   check(/Seterusnya: Lari/.test(await page.locator('#gl-seg-next').innerText()), 'next segment is a run');
   await page.click('[data-pause]'); const b2 = await page.locator('[data-end]').boundingBox(); await page.mouse.move(b2.x + 20, b2.y + 20); await page.mouse.down(); await page.waitForTimeout(1300); await page.mouse.up();
   await page.click('[data-a=yes]'); await page.waitForSelector('[data-tab=home][aria-current=page]'); check(true, 'too-short run discarded');
+  /* strength: from the Training rail into a session, through the player, saved */
+  await page.click('[data-tab=training]'); await page.waitForSelector('.hrail .str-card');
+  check((await page.locator('.hrail .str-card').count()) === 8, 'eight strength sessions in the Training rail');
+  await page.click('text=Lihat semua'); await page.waitForSelector('.str-hero'); await shot('str-library');
+  await page.click('[data-focus=core]'); check((await page.locator('#s-list .str-card').count()) === 2, 'core filter shows 2 sessions');
+  await page.click('[data-focus=all]'); await page.click('#s-list a[href="#/strength/kaki-pelari"]'); await page.waitForSelector('.mv-list');
+  check((await page.locator('.mv').count()) === 6, 'detail lists 6 moves with posters'); await shot('str-detail');
+  await page.click('[data-go]'); await page.waitForSelector('#sx');
+  check(/BERSEDIA/.test(await page.locator('#sx-tag').innerText()), 'player starts with get ready');
+  check((await page.locator('#sx-frame iframe').getAttribute('src')).includes('player.vimeo.com/video/1183237084'), 'first move video is the HITFAT squat');
+  await page.waitForTimeout(1200); const t1 = await page.locator('#sx-time').innerText(); await page.waitForTimeout(1200);
+  check(t1 !== await page.locator('#sx-time').innerText(), `timer counts down (${t1})`);
+  await page.click('[data-skip]'); await page.waitForTimeout(300); check((await page.locator('#sx-name').innerText()) === 'Squat', 'work segment shows the move');
+  await shot('str-player');
+  await page.click('[data-skip]'); check(/REHAT/.test(await page.locator('#sx-tag').innerText()), 'rest shows the next move'); await shot('str-rest');
+  await page.click('[data-pp]'); const p1 = await page.locator('#sx-time').innerText(); await page.waitForTimeout(1500);
+  check(p1 === await page.locator('#sx-time').innerText(), 'pause holds the timer');
+  await page.click('[data-pp]'); await page.waitForTimeout(27000);   // over the 30 s a saved session needs
+  for (let i = 0; i < 60 && await page.locator('#sx').count(); i++) await page.click('[data-skip]');
+  await page.waitForSelector('[data-save]'); await shot('str-done');
+  await page.fill('#fb-rpe', '7'); await page.click('[data-save]'); await page.waitForSelector('.str-hero');
+  check(/^1/.test(await page.locator('.ring .num').innerText()), 'library ring shows 1 session this week');
+  await page.click('[data-tab=home]'); await page.waitForSelector('text=1/2 minggu ini'); check(true, 'home shows 1/2 strength sessions this week');
+  await shot('str-home');
   await page.click('.preview-bar button'); await page.waitForSelector('#auth-form'); check(true, 'exit preview returns to sign-in');
 } catch (e) { console.error(e.message); failed++; }
 check(supabaseCalls === 0, `no calls to Supabase in preview (${supabaseCalls})`);

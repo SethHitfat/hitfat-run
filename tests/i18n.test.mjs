@@ -20,7 +20,8 @@ const families = {
   'loc.': ['road', 'track', 'treadmill', 'trail', 'mixed'], 'rpe.': Array.from({ length: 10 }, (_, i) => String(i + 1)),
   'src.': ['manual', 'gps', 'strava'], 'status.': ['planned', 'completed', 'skipped', 'missed', 'draft', 'review', 'published', 'archived'],
   'tab.': ['home', 'training', 'run', 'club', 'profile'],
-  'run.segName.': ['warm', 'cool', 'run', 'walk'], 'voice.seg.': ['warm', 'cool', 'run', 'walk'], 'theme.': ['system', 'light', 'dark'], 'tip.': ['pain', 'hard', 'easy'],
+  'run.segName.': ['warm', 'cool', 'run', 'walk'], 'voice.seg.': ['warm', 'cool', 'run', 'walk'],
+  'st.focus.': ['all', 'legs', 'core', 'injury', 'drills', 'power'], 'theme.': ['system', 'light', 'dark'], 'tip.': ['pain', 'hard', 'easy'],
 };
 for (const [p, vals] of Object.entries(families)) vals.forEach(v => used.add(p + v));
 let bad = 0;
