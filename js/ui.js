@@ -125,6 +125,8 @@ export function icon(name, extra = '') {
 const PHOTO = { park: '/img/run-park.jpg', track: '/img/run-track.jpg', city: '/img/run-city.jpg', sprint: '/img/run-sprint.jpg', treadmill: '/img/run-treadmill.jpg' };
 const BY_PLAN = { 'couch-to-5k': 'park', 'road-to-5k': 'track', 'improve-5k': 'sprint', 'road-to-10k': 'city' };
 const BY_CATEGORY = { easy: 'park', recovery: 'park', run_walk: 'park', long: 'city', tempo: 'track', threshold: 'track', interval: 'sprint', hill: 'sprint' };
+/* the club itself: Kota Bharu riverside (chapter, sign-in) and a night club run (community runs) */
+export const CLUB_PHOTO = '/img/club-kelantan.jpg', CLUB_RUN_PHOTO = '/img/club-night.jpg';
 export function photoFor({ plan, category, treadmill } = {}) {
   if (treadmill) return PHOTO.treadmill;
   return PHOTO[BY_PLAN[plan] || BY_CATEGORY[category] || 'track'];

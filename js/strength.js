@@ -77,7 +77,7 @@ export const WORKOUTS = [
     moves: ['squatjump', 'skater', 'lungejump', 'broadjump', 'powerskip', 'tuckjump'],
     ms: { title: 'Kuasa & Pecut', desc: 'Pliometrik untuk kaki yang lebih reaktif dan pecutan akhir yang lebih laju. Mendarat lembut.', equip: 'Tiada alat' },
     en: { title: 'Power & Speed', desc: 'Plyometrics for springier legs and a faster finishing kick. Land softly.', equip: 'No equipment' } },
-  { key: 'badan-penuh', img: '/img/str-full.jpg', focus: ['legs', 'core'], level: 'intermediate', rounds: 3, work: 40, rest: 20, roundRest: 60,
+  { key: 'badan-penuh', img: '/img/str-home.jpg', focus: ['legs', 'core'], level: 'intermediate', rounds: 3, work: 40, rest: 20, roundRest: 60,
     moves: ['squat', 'pushup', 'altlunge', 'shouldertap', 'glute', 'mtnclimb', 'bearwalk'],
     ms: { title: 'Seluruh Badan di Rumah', desc: 'Satu sesi untuk kaki, core dan bahagian atas badan. Sesuai pada hari tiada larian.', equip: 'Tiada alat' },
     en: { title: 'Full Body at Home', desc: 'Legs, core and upper body in one session. Ideal on a non-running day.', equip: 'No equipment' } },

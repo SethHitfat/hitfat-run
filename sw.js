@@ -5,13 +5,14 @@
    never pinned (the Hybrid app learned that the hard way on iOS).
    Pinned CDN libraries are cache first: their URLs never change content.
    Supabase requests are never cached: data must be live or clearly absent. */
-const VERSION = 'hfrun-v7';
+const VERSION = 'hfrun-v8';
 const SHELL = ['/', '/index.html', '/app.css', '/manifest.json',
   '/js/main.js', '/js/api.js', '/js/api-live.js', '/js/preview-api.js', '/preview/programs.json', '/js/i18n.js', '/js/ui.js', '/js/stats.js', '/js/achievements.js', '/js/gps.js', '/js/voice.js', '/js/strength.js', '/js/share.js',
   '/js/views/auth.js', '/js/views/onboarding.js', '/js/views/home.js', '/js/views/training.js', '/js/views/programs.js',
   '/js/views/workout.js', '/js/views/log.js', '/js/views/club.js', '/js/views/profile.js', '/js/views/run.js', '/js/views/strength.js', '/js/views/board.js',
   '/icon-192.png', '/favicon-32.png', '/img/run-city.jpg', '/img/run-park.jpg', '/img/run-track.jpg', '/img/run-sprint.jpg', '/img/run-treadmill.jpg',
-  '/img/str-legs.jpg', '/img/str-core.jpg', '/img/str-mobility.jpg', '/img/str-full.jpg', '/img/str-power.jpg', '/img/str-drills.jpg', '/img/str-backpack.jpg'];
+  '/img/str-legs.jpg', '/img/str-core.jpg', '/img/str-mobility.jpg', '/img/str-home.jpg', '/img/str-power.jpg', '/img/str-drills.jpg', '/img/str-backpack.jpg',
+  '/img/club-kelantan.jpg', '/img/club-night.jpg', '/img/ch-virtual.jpg', '/img/ch-finisher.jpg'];
 const PINNED = /^https:\/\/(cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2\.45\.4|cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4|fonts\.(googleapis|gstatic)\.com)\//;
 
 self.addEventListener('install', e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));

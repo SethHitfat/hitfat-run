@@ -2,7 +2,7 @@
 import * as api from '../api.js';
 import { state, go } from '../main.js';
 import { t, L, lang } from '../i18n.js';
-import { esc, on, mount, icon, photoFor, bg, km, durWords, fmtDate, fmtTime, today, skeleton, errorBox, toast, friendlyError } from '../ui.js';
+import { esc, on, mount, icon, photoFor, bg, CLUB_PHOTO, CLUB_RUN_PHOTO, km, durWords, fmtDate, fmtTime, today, skeleton, errorBox, toast, friendlyError } from '../ui.js';
 import { thisWeek, consistency, planProgress } from '../stats.js';
 import { byCode } from '../achievements.js';
 import { sessionTitle, sessionMeta } from './training.js';
@@ -49,7 +49,7 @@ async function paint(body) {
         <div class="weeks" style="margin-top:12px" aria-hidden="true">${Array.from({ length: pp.weeks }, (_, i) => {
           const ws = plan.sessions.filter(s => s.template.week === i + 1);
           return `<i class="${ws.length && ws.every(s => s.status === 'completed') ? 'done' : i + 1 === pp.week ? 'now' : ''}"></i>`; }).join('')}</div>
-      </div></a>` : `<div class="photo tall" ${bg(photoFor({ plan: 'road-to-10k' }))}><div class="in">
+      </div></a>` : `<div class="photo tall" ${bg(CLUB_PHOTO)}><div class="in">
         <div class="eyebrow">${esc(t('home.goal'))}</div>
         <h2 style="margin:6px 0 8px;font-size:40px">${esc(goalLabel || t('home.noPlanT'))}</h2>
         <p class="muted" style="margin:0 0 16px">${esc(t('home.noPlan'))}</p>
@@ -74,7 +74,7 @@ async function paint(body) {
     </div>
 
     <h2>${esc(t('home.clubRun'))}</h2>
-    ${ev ? `<a class="photo mid" href="#/event/${ev.id}" ${bg(photoFor({ category: 'long' }))}><div class="in">
+    ${ev ? `<a class="photo mid" href="#/event/${ev.id}" ${bg(CLUB_RUN_PHOTO)}><div class="in">
         <div class="row between"><span class="chip red">${esc(fmtDate(ev.starts_at))} · ${esc(fmtTime(ev.starts_at))}</span>
           ${regs.some(r => r.status === 'going') ? `<span class="chip ok">${icon('check', 'width="14" height="14"')} ${esc(t('club.going'))}</span>` : ''}</div>
         <h3 style="margin:10px 0 4px">${esc(ev.title)}</h3>

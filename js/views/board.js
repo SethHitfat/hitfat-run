@@ -5,8 +5,8 @@ import { state, go, back, isStaff } from '../main.js';
 import { t, L } from '../i18n.js';
 import { esc, on, mount, icon, ymd, parseYmd, startOfWeek, startOfMonth, fmtDate, km, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError, openSheet, closeSheet, DAY_MS } from '../ui.js';
 
-const PHOTOS = ['/img/run-city.jpg', '/img/run-track.jpg', '/img/run-park.jpg', '/img/run-sprint.jpg'];
-const photoOf = c => PHOTOS[[...c.id].reduce((s, ch) => s + ch.charCodeAt(0), 0) % PHOTOS.length];
+// a solo virtual run for short targets, the club together for long ones, the finish line once it is over
+const photoOf = c => phase(c) === 'ended' ? '/img/ch-finisher.jpg' : c.target_m <= 21100 ? '/img/ch-virtual.jpg' : '/img/club-night.jpg';
 const optedIn = () => !!(state.profile && state.profile.board_opt_in_at && state.profile.board_name);
 const todayYmd = () => ymd(new Date());
 export const phase = c => c.starts_on > todayYmd() ? 'soon' : c.ends_on < todayYmd() ? 'ended' : 'live';

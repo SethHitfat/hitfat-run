@@ -4,7 +4,7 @@ import { state, go, back, isStaff, canManageChapter } from '../main.js';
 import { t } from '../i18n.js';
 import { challengeCard, myProgress, phase, optInSheet } from './board.js';
 import { ymd, startOfWeek } from '../ui.js';
-import { esc, on, mount, icon, photoFor, bg, fmtDate, fmtDateLong, fmtTime, localInput, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
+import { esc, on, mount, icon, photoFor, bg, CLUB_PHOTO, CLUB_RUN_PHOTO, fmtDate, fmtDateLong, fmtTime, localInput, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
 
 const backBtn = `<button class="icon-btn" data-back aria-label="${esc(t('common.back'))}">${icon('back')}</button>`;
 
@@ -33,7 +33,7 @@ async function paint(body) {
   const past = history.filter(h => h.event && Date.parse(h.event.starts_at) < Date.now()).sort((a, b) => b.event.starts_at.localeCompare(a.event.starts_at));
 
   const root = mount(body, `
-    ${chapters.map(c => `<div class="photo tall" ${bg(photoFor({ plan: 'road-to-10k' }), 'margin-bottom:12px')}><div class="in">
+    ${chapters.map(c => `<div class="photo tall" ${bg(CLUB_PHOTO, 'margin-bottom:12px')}><div class="in">
       <div class="eyebrow">${esc(t('club.chapter'))}</div>
       <h2 style="margin:6px 0 4px;font-size:36px">${esc(c.name)}</h2>
       <div class="muted small">${esc([c.city, c.state].filter(Boolean).join(', '))}</div>
@@ -73,7 +73,7 @@ async function paint(body) {
 
 function eventCard(e, n, going) {
   const left = e.capacity ? Math.max(0, e.capacity - n) : null;
-  return `<a class="photo mid" href="#/event/${e.id}" ${bg(photoFor({ category: 'tempo' }), 'margin-bottom:12px')}><div class="in">
+  return `<a class="photo mid" href="#/event/${e.id}" ${bg(CLUB_RUN_PHOTO, 'margin-bottom:12px')}><div class="in">
     <div class="row between"><span class="chip red">${esc(fmtDate(e.starts_at))} · ${esc(fmtTime(e.starts_at))}</span>
       ${e.status === 'cancelled' ? `<span class="chip warn">${esc(t('club.cancelled'))}</span>` : going ? `<span class="chip ok">${icon('check', 'width="14" height="14"')} ${esc(t('club.going'))}</span>` : left === 0 ? `<span class="chip">${esc(t('club.fullShort'))}</span>` : ''}</div>
     <h3 style="margin:10px 0 4px;font-size:20px">${esc(e.title)}</h3>

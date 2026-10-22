@@ -1,11 +1,11 @@
 import * as api from '../api.js';
 import { t, setLang, lang } from '../i18n.js';
-import { esc, on, photoFor, bg } from '../ui.js';
+import { esc, on, bg, CLUB_PHOTO } from '../ui.js';
 
 let mode = 'signin';
 export function render(view) {
   view.innerHTML = `<section class="auth" style="padding-top:0;justify-content:flex-start">
-    <div class="photo auth-hero" ${bg(photoFor({ plan: 'road-to-10k' }), 'display:flex;flex-direction:column;justify-content:space-between')}>
+    <div class="photo auth-hero" ${bg(CLUB_PHOTO, 'display:flex;flex-direction:column;justify-content:space-between')}>
       <div class="row between"><div class="wordmark" style="color:#fff">HITFAT <b>RUN</b> CLUB</div>
         <div class="seg" style="width:120px;background:rgba(0,0,0,.45)" role="group" aria-label="${esc(t('settings.language'))}">
           <button data-lang="ms" aria-pressed="${lang() === 'ms'}">BM</button><button data-lang="en" aria-pressed="${lang() === 'en'}">EN</button></div></div>
