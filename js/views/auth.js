@@ -26,6 +26,8 @@ export function render(view) {
         ${mode === 'signin' ? `<button class="link" data-mode="reset">${esc(t('auth.forgot'))}</button><button class="link" data-mode="signup">${esc(t('auth.toSignup'))}</button>`
           : `<span></span><button class="link" data-mode="signin">${esc(t('auth.toSignin'))}</button>`}
       </div>
+      <button class="btn ghost block" style="margin-top:18px" data-preview>${esc(t('preview.try'))}</button>
+      <p class="muted tiny" style="margin:8px 0 0;text-align:center">${esc(t('preview.tryHelp'))}</p>
       <p class="faint tiny" style="margin-top:22px;text-align:center">${esc(t('auth.shared'))} · <a href="/privacy">${esc(t('auth.privacy'))}</a> · <a href="/terms">${esc(t('auth.terms'))}</a></p>
     </div></section>`;
 
@@ -34,6 +36,7 @@ export function render(view) {
   const host = view.parentElement;
   on(view, '[data-lang]', 'click', (e, b) => { setLang(b.dataset.lang); render(host); });
   on(view, '[data-mode]', 'click', (e, b) => { mode = b.dataset.mode; render(host); });
+  on(view, '[data-preview]', 'click', () => api.startPreview());
   on(view, '[data-google]', 'click', async () => { msg(''); const { error } = await api.signInGoogle(); if (error) msg(error.message); });
   view.querySelector('#auth-form').addEventListener('submit', async e => {
     e.preventDefault();

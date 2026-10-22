@@ -102,7 +102,7 @@ export async function settings(view) {
       <div class="row between"><div><div style="font-weight:700">${esc(t('settings.delete'))}</div><div class="muted small">${esc(t('settings.deleteHelp'))}</div></div><button class="btn sm danger" data-delete>${esc(t('common.delete'))}</button></div>
       <div><a class="link small" href="/privacy">${esc(t('auth.privacy'))}</a> · <a class="link small" href="/terms">${esc(t('auth.terms'))}</a></div>
     </div>
-    <button class="btn block" style="margin-top:20px" data-out>${esc(t('settings.signOut'))}</button>
+    <button class="btn block" style="margin-top:20px" data-out>${esc(t(api.PREVIEW ? 'preview.exit' : 'settings.signOut'))}</button>
     <p class="faint tiny" style="text-align:center;margin-top:16px">HITFAT RUN CLUB · ${esc(api.session.user?.email || '')}</p></div>`;
   const root = view.firstElementChild;   // listeners bind to this render only
   root.querySelector('[data-back]').onclick = () => back('profile');
@@ -130,5 +130,8 @@ export async function settings(view) {
     if (!await confirmSheet(t('settings.deleteQ'), t('settings.deleteConfirm'), t('settings.deleteGo'), true)) return;
     try { await api.deleteMyRunData(); await loadRunner(); toast(t('settings.deleted')); go('onboarding', true); } catch (x) { toast(friendlyError(x)); }
   });
-  on(root, '[data-out]', 'click', async () => { if (await confirmSheet(t('settings.signOutQ'), t('settings.signOutHelp'), t('settings.signOut'))) api.signOut(); });
+  on(root, '[data-out]', 'click', async () => {
+    if (api.PREVIEW) return api.endPreview();
+    if (await confirmSheet(t('settings.signOutQ'), t('settings.signOutHelp'), t('settings.signOut'))) api.signOut();
+  });
 }

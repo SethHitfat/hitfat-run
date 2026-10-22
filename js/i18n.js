@@ -182,6 +182,8 @@ ms: {
   'gps.gaps': 'Isyarat GPS hilang {n} kali; jarak mungkin kurang. Semak sebelum simpan.',
   'gps.accuracyNote': 'Direkod dengan GPS browser. Jarak bergantung pada kualiti isyarat dan boleh kurang tepat dari jam GPS.',
 
+  'preview.try': 'Cuba tanpa log masuk', 'preview.tryHelp': 'Mod pratonton: semua data disimpan dalam browser ini sahaja.',
+  'preview.bar': 'Mod pratonton: data hanya dalam browser ini', 'preview.exit': 'Keluar pratonton',
   'unit.km': 'Kilometer', 'unit.h': 'j', 'unit.m': 'm', 'unit.min': 'min', 'unit.hh': 'jam', 'unit.mm': 'min', 'unit.ss': 'saat',
   'unit.hours': 'Jam', 'unit.minutes': 'Minit', 'unit.seconds': 'Saat',
 },
@@ -350,6 +352,8 @@ en: {
   'gps.gaps': 'GPS signal dropped {n} times; distance may be short. Check before saving.',
   'gps.accuracyNote': 'Recorded with browser GPS. Distance depends on signal quality and can be less accurate than a GPS watch.',
 
+  'preview.try': 'Try without signing in', 'preview.tryHelp': 'Preview mode: everything is kept in this browser only.',
+  'preview.bar': 'Preview mode: data stays in this browser', 'preview.exit': 'Exit preview',
   'unit.km': 'Kilometres', 'unit.h': 'h', 'unit.m': 'm', 'unit.min': 'min', 'unit.hh': 'hr', 'unit.mm': 'min', 'unit.ss': 'sec',
   'unit.hours': 'Hours', 'unit.minutes': 'Minutes', 'unit.seconds': 'Seconds',
 } };

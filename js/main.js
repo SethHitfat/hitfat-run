@@ -110,9 +110,16 @@ async function boot() {
   try { const l = localStorage.getItem('hfrun_lang'); if (l) setLang(l); } catch (e) {}
   document.documentElement.lang = lang();
   netBanner();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.warn('sw', e));
+  if (api.PREVIEW) {                       // try-before-signing-in: nothing leaves this browser
+    const b = document.createElement('div'); b.className = 'preview-bar';
+    b.innerHTML = `<span>${esc(t('preview.bar'))}</span><button>${esc(t('preview.exit'))}</button>`;
+    b.querySelector('button').onclick = () => api.endPreview();
+    document.body.prepend(b); document.body.classList.add('has-preview');
+    return onSession({ user: api.session.user });
+  }
   if (!api.sb) { state.ready = true; $('#view').innerHTML = errorBox(new Error(t('err.nolib')), true); $('#view [data-retry]')?.addEventListener('click', () => location.reload()); return; }
   api.sb.auth.onAuthStateChange((ev, s) => { if (ev === 'INITIAL_SESSION' || ev === 'SIGNED_IN' || ev === 'SIGNED_OUT' || ev === 'USER_UPDATED') onSession(s); });
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(e => console.warn('sw', e));
 }
 window.addEventListener('error', e => console.error('JS error', e.message, e.filename, e.lineno));
 boot();
