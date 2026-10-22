@@ -15,7 +15,7 @@ begin;
 
 -- ───────────────────────── helpers ─────────────────────────
 create or replace function public.run_touch() returns trigger
-language plpgsql as $$ begin new.updated_at = now(); return new; end $$;
+language plpgsql set search_path = public as $$ begin new.updated_at = now(); return new; end $$;
 
 -- ───────────────────────── chapters & staff ─────────────────────────
 create table if not exists public.run_chapters(
@@ -519,6 +519,9 @@ revoke all on function public.run_evaluate_achievements() from public, anon;
 revoke all on function public.run_delete_my_data() from public, anon;
 grant execute on function public.run_enroll(uuid, date, smallint[]), public.run_reschedule(date), public.run_rsvp(uuid, boolean),
   public.run_event_counts(uuid[]), public.run_evaluate_achievements(), public.run_delete_my_data() to authenticated;
+-- role checks are used by RLS for signed-in users only
+revoke all on function public.run_is_super_admin(), public.run_has_role(text[], uuid), public.run_is_staff(), public.run_entitled(text) from public, anon;
+grant execute on function public.run_is_super_admin(), public.run_has_role(text[], uuid), public.run_is_staff(), public.run_entitled(text) to authenticated;
 
 -- seed the first chapter
 insert into public.run_chapters(slug, name, state, city) values ('kelantan', 'HITFAT Run Club Kelantan', 'Kelantan', 'Kota Bharu')
