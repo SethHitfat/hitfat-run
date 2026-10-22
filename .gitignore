@@ -1,3 +1,4 @@
 .DS_Store
 tests/shots/
 node_modules/
+.netlify/
