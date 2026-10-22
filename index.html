@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HITFAT RUN CLUB</title>
+<meta name="description" content="Kelab larian HITFAT: pelan latihan berstruktur, larian komuniti dan kemajuan anda. Run together. Train smarter.">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HITFAT RUN">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/app.css">
+<script>
+  /* apply the saved theme before first paint, so there is no flash */
+  try{ const t=localStorage.getItem('hfrun_theme'); if(t==='light'||t==='dark') document.documentElement.dataset.theme=t; }catch(e){}
+</script>
+</head>
+<body>
+<div id="shell">
+  <nav class="tabs hide" id="tabs" aria-label="Navigasi utama"></nav>
+  <main id="view" tabindex="-1"><div class="boot"><div class="wordmark">HITFAT <b>RUN</b></div></div></main>
+</div>
+<div id="sheet" class="sheet hide" role="dialog" aria-modal="true"><div class="sheet-box"><div class="grab"></div><div id="sheet-body"></div></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="offline" class="offline hide" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/main.js"></script>
+<noscript>HITFAT RUN CLUB memerlukan JavaScript.</noscript>
+</body>
+</html>
