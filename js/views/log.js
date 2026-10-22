@@ -7,6 +7,7 @@ import { esc, on, mount, icon, uuid, km, dur, pace, paceOf, fmtDateLong, fmtTime
   toast, confirmSheet, openSheet, closeSheet, friendlyError } from '../ui.js';
 import { feedbackFields, bindFeedback, afterComplete, RUN_CATS } from './workout.js';
 import { byCode } from '../achievements.js';
+import { photoFor, fmtDate } from '../ui.js';
 
 const TYPES = ['easy', 'recovery', 'long', 'tempo', 'threshold', 'interval', 'hill', 'run_walk', 'race', 'other'];
 export const GPS_DRAFT = 'hfrun_gps_draft';
@@ -134,7 +135,8 @@ export async function detail(view, id) {
       <h1 style="margin:6px 0 4px">${esc(a.title || t('cat.' + (a.workout_type || 'other')))}</h1>
       <div class="row wrap"><span class="chip">${esc(t('src.' + a.source))}</span>${a.scheduled_workout_id ? `<a class="chip red" href="#/workout/${a.scheduled_workout_id}" style="text-decoration:none">${esc(t('act.planSession'))}</a>` : ''}</div>
       ${a.route && a.route.length > 1 ? `<div class="map" id="a-map" style="margin-top:16px"></div>` : ''}
-      <div class="num big" style="margin-top:18px">${km(a.distance_m)}</div><div class="eyebrow">${esc(t('unit.km'))}</div>
+      <div class="row between" style="margin-top:18px;align-items:flex-end"><div><div class="num big">${km(a.distance_m)}</div><div class="eyebrow">${esc(t('unit.km'))}</div></div>
+        ${a.source !== 'strava' ? `<button class="btn primary" data-share>${icon('share', 'width="18" height="18"')} ${esc(t('share.btn'))}</button>` : ''}</div>
       <div class="metrics three" style="margin-top:18px">
         <div class="metric"><div class="num">${pace(a.avg_pace_s_km)}</div><div class="l">${esc(t('stat.pace'))}</div></div>
         <div class="metric"><div class="num">${dur(a.moving_time_s)}</div><div class="l">${esc(t('log.moving'))}</div></div>
@@ -147,6 +149,12 @@ export async function detail(view, id) {
       ${a.source === 'gps' ? `<p class="muted tiny" style="margin-top:16px">${esc(t('gps.accuracyNote'))}</p>` : ''}
       <div class="row" style="margin-top:24px">${a.source !== 'strava' ? `<a class="btn block" href="#/log?edit=${a.id}">${icon('edit', 'width="18" height="18"')} ${esc(t('common.edit'))}</a>` : ''}
         <button class="btn ghost block danger" data-del>${esc(t('common.delete'))}</button></div>`);
+    // Strava activities are never turned into share cards (their terms keep that data with the athlete)
+    on(root, '[data-share]', 'click', async () => (await import('../share.js')).openShare({
+      big: km(a.distance_m), unit: 'KM', title: a.title || t('cat.' + (a.workout_type || 'other')),
+      date: fmtDate(a.started_at, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      stats: [[pace(a.avg_pace_s_km), t('stat.pace')], [dur(a.moving_time_s), t('stat.time')], [a.rpe ? a.rpe + '/10' : '–', 'RPE']],
+      photo: photoFor({ category: a.workout_type }), route: a.route }));
     on(root, '[data-del]', 'click', async () => {
       if (!await confirmSheet(t('act.delQ'), t('act.delHelp'), t('common.delete'), true)) return;
       try { await api.deleteActivity(a.id); toast(t('act.deleted')); go('history', true); } catch (e) { toast(friendlyError(e)); }

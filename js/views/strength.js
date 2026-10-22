@@ -3,7 +3,7 @@
 import * as api from '../api.js';
 import { go, back } from '../main.js';
 import { t, L } from '../i18n.js';
-import { esc, on, mount, icon, dur, uuid, toast, confirmSheet, friendlyError, startOfWeek, skeleton, errorBox } from '../ui.js';
+import { esc, on, mount, icon, dur, uuid, fmtDate, toast, confirmSheet, friendlyError, startOfWeek, skeleton, errorBox } from '../ui.js';
 import { WORKOUTS, MOVES, FOCI, byKey, timeline, minutes, title, moveName, moveCue, poster, videoSrc } from '../strength.js';
 import * as coach from '../voice.js';
 
@@ -221,7 +221,14 @@ function finish(view, complete) {
     try {
       const r = await api.saveStrength({ id: uuid(), workout_key: w.key, started_at: started.toISOString(), duration_s: Math.min(14400, secs), moves_done: moves, rpe });
       toast(r.queued ? t('log.queued') : t('st.saved'));
-      go('strength', true);
+      // saved: offer the share card, then back to the library
+      e.target.remove(); root.querySelector('[data-discard]').remove(); root.querySelector('#fb-rpe').disabled = true;
+      root.insertAdjacentHTML('beforeend', `<button class="btn primary block lg" style="margin-top:16px" data-share>${icon('share', 'width="18" height="18"')} ${esc(t('share.btn'))}</button>
+        <a class="btn ghost block" style="margin-top:10px" href="#/strength">${esc(t('st.finish'))}</a>`);
+      root.querySelector('[data-share]').onclick = async () => (await import('../share.js')).openShare({
+        big: String(Math.max(1, Math.round(secs / 60))), unit: 'MIN', title: title(w),
+        date: fmtDate(started, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+        stats: [[String(moves), t('st.movesDone')], [String(w.rounds), t('st.rounds')], [rpe + '/10', 'RPE']], photo: w.img });
     } catch (err) { toast(friendlyError(err)); e.target.disabled = false; }
   };
 }

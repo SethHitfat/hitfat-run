@@ -1,6 +1,6 @@
 // Preview mode end to end: no sign-in, no database, everything in localStorage.
 //   PLAYWRIGHT=/path/to/playwright node tests/preview.mjs
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..'), ORIGIN = 'http://127.0.0.1:8798';
@@ -49,14 +49,30 @@ try {
   await page.click('[data-mode=dist]'); check((await page.locator('#goal .num').innerText()) === '5', 'distance goal picker shows 5 km');
   await page.click('[data-step="1"]'); check((await page.locator('#goal .num').innerText()) === '6', 'goal +1 km');
   await page.click('.run-go'); await page.click('#cd'); await page.waitForSelector('#gl');
-  await page.waitForTimeout(11000); await shot('run-live');
+  await page.waitForTimeout(33000); await shot('run-live');
   const liveKm = parseFloat(await page.locator('#gl-km').innerText()); check(liveKm > 0.005, `live distance grows (${liveKm} km)`);
   check(/km daripada 6/.test(await page.locator('#gl-unit').innerText()), 'goal shown under the distance');
   await page.click('[data-pause]'); await page.waitForSelector('#gl-paused:not(.hide)');
   const box = await page.locator('[data-end]').boundingBox(); await page.mouse.move(box.x + 20, box.y + 20); await page.mouse.down(); await page.waitForTimeout(1300); await page.mouse.up();
   await page.waitForSelector('#log-form'); const d = parseFloat(await page.locator('#lf-dist').inputValue());
-  check(d >= 0.05 && d < 0.15, `log form pre-filled from GPS (${d} km)`);
+  check(d >= 0.15 && d < 0.3, `log form pre-filled from GPS (${d} km)`);
   await page.click('#log-form [type=submit]'); await page.waitForTimeout(800); if (await page.locator('[data-ok]').count()) await page.click('[data-ok]');
+  /* share card from the saved GPS run, plus a realistic route rendered for a visual check */
+  await page.waitForSelector('#view [data-share]'); await page.click('#view [data-share]');
+  await page.waitForFunction(() => (document.querySelector('#sh-img')?.src || '').startsWith('data:image'));
+  check(await page.locator('#sh-hide').isChecked(), 'share hides the start and end of the route by default');
+  await page.click('[data-format=post]'); await page.waitForTimeout(400); await shot('share-sheet');
+  await page.keyboard.press('Escape');
+  const cards = await page.evaluate(async () => {
+    const { draw, trimRoute } = await import('/js/share.js');
+    const route = []; for (let i = 0; i <= 240; i++) { const a = i / 240 * Math.PI * 2; route.push([6.1254 + 0.012 * Math.sin(a) + 0.003 * Math.sin(3 * a), 102.2386 + 0.016 * Math.cos(a)]); }
+    const trimmed = trimRoute(route);
+    const d = { big: '5.02', unit: 'KM', title: 'Larian Pagi Sabtu', date: 'Sabtu, 24 Oktober 2026', stats: [['6:12', 'Pace'], ['31:07', 'Masa'], ['6/10', 'RPE']], photo: '/img/run-city.jpg' };
+    const a = await draw({ ...d, route: trimmed }, { style: 'route', format: 'story' }), b = await draw({ ...d, route: null }, { style: 'photo', format: 'post' });
+    return { n: route.length, t: trimmed.length, a: a.toDataURL('image/jpeg', .85), b: b.toDataURL('image/jpeg', .85) };
+  });
+  check(cards.t > 0 && cards.t <= cards.n - 8, `route trimmed for privacy (${cards.n} → ${cards.t} points)`);
+  for (const k of ['a', 'b']) writeFileSync(join(process.env.SHOTS || '/tmp', `pv-card-${k}.jpg`), Buffer.from(cards[k].split(',')[1], 'base64'));
   await page.click('[data-tab=training]'); const href = await page.locator('a.sess').nth(1).getAttribute('href');
   await page.goto(`${ORIGIN}/#/run?sw=${href.split('/').pop()}`); await page.waitForSelector('.run-go');
   check((await page.locator('[data-mode=session]').getAttribute('aria-pressed')) === 'true', 'plan session preselected');
@@ -86,7 +102,10 @@ try {
   await page.click('[data-pp]'); await page.waitForTimeout(27000);   // over the 30 s a saved session needs
   for (let i = 0; i < 60 && await page.locator('#sx').count(); i++) await page.click('[data-skip]');
   await page.waitForSelector('[data-save]'); await shot('str-done');
-  await page.fill('#fb-rpe', '7'); await page.click('[data-save]'); await page.waitForSelector('.str-hero');
+  await page.fill('#fb-rpe', '7'); await page.click('[data-save]');
+  await page.click('.str-done [data-share]'); await page.waitForFunction(() => (document.querySelector('#sh-img')?.src || '').startsWith('data:image'));
+  await shot('share-strength'); check(true, 'strength session share card'); await page.keyboard.press('Escape');
+  await page.click('.str-done a[href="#/strength"]'); await page.waitForSelector('.str-hero');
   check(/^1/.test(await page.locator('.ring .num').innerText()), 'library ring shows 1 session this week');
   await page.click('[data-tab=home]'); await page.waitForSelector('text=1/2 minggu ini'); check(true, 'home shows 1/2 strength sessions this week');
   await shot('str-home');
