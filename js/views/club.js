@@ -2,6 +2,8 @@
 import * as api from '../api.js';
 import { state, go, back, isStaff, canManageChapter } from '../main.js';
 import { t } from '../i18n.js';
+import { challengeCard, myProgress, phase, optInSheet } from './board.js';
+import { ymd, startOfWeek } from '../ui.js';
 import { esc, on, mount, icon, photoFor, bg, fmtDate, fmtDateLong, fmtTime, localInput, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
 
 const backBtn = `<button class="icon-btn" data-back aria-label="${esc(t('common.back'))}">${icon('back')}</button>`;
@@ -21,6 +23,13 @@ async function paint(body) {
   const [counts, regs] = await Promise.all([api.eventCounts(ids), api.myRegistrations(ids)]);
   const going = new Set(regs.filter(r => r.status === 'going').map(r => r.event_id));
   const member = new Set(mine.map(m => m.chapter_id));
+  // virtual challenges (live and upcoming first, then the last one that ended) and this week's top three
+  const allCh = await api.listChallenges().catch(() => []);
+  const live = allCh.filter(c => c.status === 'published' && phase(c) !== 'ended').sort((a, b) => a.starts_on.localeCompare(b.starts_on));
+  const shown = [...live, ...allCh.filter(c => c.status === 'published' && phase(c) === 'ended').slice(0, 1)];
+  const [chCounts, myCh, top] = await Promise.all([api.challengeCounts(shown.map(c => c.id)).catch(() => ({})), api.myChallenges().catch(() => []),
+    api.leaderboard({ from: ymd(startOfWeek()), to: ymd(new Date()) }).catch(() => [])]);
+  const progress = Object.fromEntries(await Promise.all(shown.filter(c => myCh.some(m => m.challenge_id === c.id)).map(async c => [c.id, await myProgress(c).catch(() => 0)])));
   const past = history.filter(h => h.event && Date.parse(h.event.starts_at) < Date.now()).sort((a, b) => b.event.starts_at.localeCompare(a.event.starts_at));
 
   const root = mount(body, `
@@ -31,6 +40,19 @@ async function paint(body) {
       <div style="margin-top:14px">${member.has(c.id)
         ? `<span class="chip ok">${icon('check', 'width="14" height="14"')} ${esc(t('club.member'))}</span> <button class="btn sm ghost" style="color:#fff;border-color:#444;margin-left:6px" data-leave="${c.id}">${esc(t('club.leave'))}</button>`
         : `<button class="btn primary" data-join="${c.id}">${esc(t('club.join'))}</button>`}</div></div></div>`).join('')}
+
+    <h2 class="row between"><span>${esc(t('ch.title'))}</span>${isStaff(['head_coach', 'running_coach']) ? `<a class="link small" href="#/challenge/new" style="font-family:var(--font)">+ ${esc(t('ch.new'))}</a>` : ''}</h2>
+    ${shown.length ? `<div class="hrail">${shown.map(c => challengeCard(c, { n: chCounts[c.id] || 0, joined: c.id in progress, mine: progress[c.id] || 0 })).join('')}</div>`
+      : `<div class="card muted">${esc(t('ch.none'))}</div>`}
+
+    <h2 class="row between"><span>${esc(t('lb.title'))}</span><a class="link small" href="#/leaderboard" style="font-family:var(--font)">${esc(t('st.all'))}</a></h2>
+    <a class="card tap lb-mini" href="#/leaderboard" style="text-decoration:none">
+      <div class="eyebrow">${esc(t('lb.week'))}</div>
+      ${top.length ? top.slice(0, 3).map(r => `<div class="row between" style="margin-top:10px"><div class="row" style="gap:12px"><span class="lb-rank num sm top${r.rank}">${r.rank}</span><b class="ellipsis">${esc(r.name)}</b></div>
+        <span class="num" style="font-size:22px">${Number(r.km).toFixed(1)} <span class="small" style="font-family:var(--font)">km</span></span></div>`).join('')
+        : `<div class="muted small" style="margin-top:6px">${esc(t('lb.emptyWeek'))}</div>`}
+      ${state.profile?.board_opt_in_at ? '' : `<div class="small" style="margin-top:12px;color:var(--accent-text);font-weight:700">${esc(t('lb.ctaShort'))} →</div>`}
+    </a>
 
     <h2>${esc(t('club.upcoming'))}</h2>
     ${events.length ? events.map(e => eventCard(e, counts[e.id] || 0, going.has(e.id))).join('')

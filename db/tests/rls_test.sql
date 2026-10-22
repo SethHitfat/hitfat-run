@@ -193,6 +193,65 @@ do $$ begin assert (select count(*) from run_strength_logs) = 1, 'runner sees so
 reset role; set role anon;
 select t.expect_error($q$ select count(*) from run_strength_logs $q$, '42501');
 
+-- ── 8c. boards show only runners who opted in, only totals, never Strava ──
+reset role; set role authenticated;
+select t.as_user('00000000-0000-0000-0000-00000000000a');
+do $$ begin assert (select count(*) from run_leaderboard(current_date - 7, current_date)) = 0, 'runner on the board without opting in'; end $$;
+update run_profiles set board_name = 'Aisyah K', board_opt_in_at = now();
+do $$ begin
+  assert (select count(*) from run_leaderboard(current_date - 7, current_date)) = 1, 'opted-in runner missing';
+  assert (select km from run_leaderboard(current_date - 7, current_date)) = 5.2, 'wrong km';
+  assert (select me from run_leaderboard(current_date - 7, current_date)), 'me flag';
+  assert (select count(*) from run_leaderboard(current_date - 7, current_date, null, true)) = 0, 'GPS-only counted a manual run';
+end $$;
+select t.as_user('00000000-0000-0000-0000-00000000000b');
+insert into run_profiles(user_id) values (auth.uid()) on conflict do nothing;
+insert into run_activities(id, started_at, distance_m, moving_time_s, source) values ('10000000-0000-0000-0000-0000000000b1', now() - interval '2 hours', 3000, 1100, 'gps');
+insert into run_activities(id, started_at, distance_m, moving_time_s, source, external_id) values ('10000000-0000-0000-0000-0000000000b2', now() - interval '3 hours', 9000, 3000, 'strava', 's1');
+do $$ begin
+  assert (select count(*) from run_leaderboard(current_date - 7, current_date)) = 1, 'B (not opted in) appears on the board';
+  assert not (select me from run_leaderboard(current_date - 7, current_date)), 'me flag for someone else';
+  assert (select count(*) from run_activities) = 2, 'the board leaked A''s runs to B';
+end $$;
+update run_profiles set board_name = 'Badrul', board_opt_in_at = now();
+do $$ begin assert (select km from run_leaderboard(current_date - 7, current_date) where me) = 3.0, 'a Strava run counted on the board'; end $$;
+select t.expect_error($q$ update run_profiles set board_name = 'x' $q$, '23514');
+do $$ begin assert (select count(*) from run_leaderboard(current_date - 200, current_date)) = 0, 'a range over 92 days is refused'; end $$;
+
+-- challenges: coaches set them, members join open ones, counts are numbers only
+select t.as_user('00000000-0000-0000-0000-00000000000d');
+insert into run_challenges(id, slug, i18n, target_m, starts_on, ends_on) values
+  ('50000000-0000-0000-0000-000000000001', 'test-open', '{"ms":{"title":"Cabaran Ujian"}}', 5000, current_date - 3, current_date + 3),
+  ('50000000-0000-0000-0000-000000000002', 'test-closed', '{"ms":{"title":"Cabaran Lama"}}', 5000, current_date - 30, current_date - 1);
+select t.as_user('00000000-0000-0000-0000-00000000000c');
+select t.expect_error($q$ insert into run_challenges(slug, i18n, target_m, starts_on, ends_on) values ('captain-try', '{"ms":{"title":"Tidak boleh"}}', 5000, current_date, current_date + 5) $q$, '42501');
+select t.as_user('00000000-0000-0000-0000-00000000000a');
+select t.expect_error($q$ insert into run_challenges(slug, i18n, target_m, starts_on, ends_on) values ('member-try', '{"ms":{"title":"Tidak boleh"}}', 5000, current_date, current_date + 5) $q$, '42501');
+insert into run_challenge_entries(challenge_id) values ('50000000-0000-0000-0000-000000000001');
+select t.expect_error($q$ insert into run_challenge_entries(challenge_id) values ('50000000-0000-0000-0000-000000000002') $q$, '42501');
+select t.expect_error($q$ insert into run_challenge_entries(challenge_id, user_id) values ('50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b') $q$, '42501');
+select t.as_user('00000000-0000-0000-0000-00000000000b');
+insert into run_challenge_entries(challenge_id) values ('50000000-0000-0000-0000-000000000001');
+do $$ begin
+  assert (select count(*) from run_challenge_entries) = 1, 'B sees A''s challenge entry';
+  assert (select n from run_challenge_counts(array['50000000-0000-0000-0000-000000000001'::uuid])) = 2, 'participant count';
+  assert (select count(*) from run_challenge_board('50000000-0000-0000-0000-000000000001')) = 2, 'challenge board';
+  assert (select done from run_challenge_board('50000000-0000-0000-0000-000000000001') where name = 'Aisyah K'), 'A has 5.2 of 5 km: done';
+  assert not (select done from run_challenge_board('50000000-0000-0000-0000-000000000001') where me), 'B has 3 of 5 km';
+end $$;
+select t.as_user('00000000-0000-0000-0000-00000000000a');
+update run_profiles set board_opt_in_at = null;
+select t.as_user('00000000-0000-0000-0000-00000000000b');
+do $$ begin
+  assert (select count(*) from run_leaderboard(current_date - 7, current_date) where not me) = 0, 'opt-out not immediate';
+  assert (select count(*) from run_challenge_board('50000000-0000-0000-0000-000000000001') where not me) = 0, 'opt-out not immediate on challenge board';
+end $$;
+select t.as_user('00000000-0000-0000-0000-00000000000a');
+update run_profiles set board_opt_in_at = now();
+reset role; set role anon;
+select t.expect_error($q$ select * from run_leaderboard(current_date - 7, current_date) $q$, '42501');
+select t.expect_error($q$ select count(*) from run_challenges $q$, '42501');
+
 -- ── 9. delete my data removes every HITFAT RUN row for the caller only ──
 reset role; set role authenticated;
 select t.as_user('00000000-0000-0000-0000-00000000000a');
@@ -204,6 +263,8 @@ do $$ begin
   assert (select count(*) from run_profiles where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'profile left';
   assert (select count(*) from run_user_achievements where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'achievements left';
   assert (select count(*) from run_strength_logs where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'strength logs left';
+  assert (select count(*) from run_challenge_entries where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'challenge entries left';
+  assert (select count(*) from run_challenge_entries where user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'deleted someone else''s challenge entry';
   assert (select count(*) from run_strength_logs where user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'deleted someone else''s strength log';
   assert (select count(*) from run_event_registrations where user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'deleted someone else''s data';
   assert exists(select 1 from auth.users where id = '00000000-0000-0000-0000-00000000000a'), 'shared account removed';

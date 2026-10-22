@@ -100,6 +100,8 @@ export async function settings(view) {
     <h2>${esc(t('settings.privacy'))}</h2>
     <div class="card list">
       <div><div style="font-weight:700">${esc(t('settings.whoSees'))}</div><div class="muted small" style="margin-top:4px">${esc(t('settings.whoSeesHelp'))}</div></div>
+      <div class="row between"><div><div style="font-weight:700">${esc(t('lb.title'))}</div><div class="muted small">${esc(state.profile?.board_opt_in_at ? t('lb.onAs', { name: state.profile.board_name }) : t('lb.off'))}</div></div>
+        <button class="btn sm" data-board>${esc(state.profile?.board_opt_in_at ? t('lb.settings') : t('lb.join'))}</button></div>
       <div class="row between"><div><div style="font-weight:700">${esc(t('settings.delete'))}</div><div class="muted small">${esc(t('settings.deleteHelp'))}</div></div><button class="btn sm danger" data-delete>${esc(t('common.delete'))}</button></div>
       <div><a class="link small" href="/privacy">${esc(t('auth.privacy'))}</a> · <a class="link small" href="/terms">${esc(t('auth.terms'))}</a></div>
     </div>
@@ -128,6 +130,7 @@ export async function settings(view) {
     };
   });
   on(root, '[data-ob]', 'click', () => go('onboarding?restart=1'));
+  on(root, '[data-board]', 'click', async () => (await import('./board.js')).optInSheet(() => settings(view)));
   on(root, '[data-delete]', 'click', async () => {
     if (!await confirmSheet(t('settings.deleteQ'), t('settings.deleteConfirm'), t('settings.deleteGo'), true)) return;
     try { await api.deleteMyRunData(); await loadRunner(); toast(t('settings.deleted')); go('onboarding', true); } catch (x) { toast(friendlyError(x)); }

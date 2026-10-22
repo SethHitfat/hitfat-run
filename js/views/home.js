@@ -7,6 +7,7 @@ import { thisWeek, consistency, planProgress } from '../stats.js';
 import { byCode } from '../achievements.js';
 import { sessionTitle, sessionMeta } from './training.js';
 import { card as strengthCard, suggestion, WEEK_TARGET } from './strength.js';
+import { challengeCard, myProgress, phase } from './board.js';
 import { startOfWeek } from '../ui.js';
 
 export async function render(view) {
@@ -28,6 +29,10 @@ async function paint(body) {
     api.activePlan(), api.listActivities({ since }), api.listAchievements(), api.myChapters().catch(() => []),
     api.listStrength({ since: startOfWeek() }).catch(() => []),
   ]);
+  // the challenge you are in right now, with your progress
+  const [allCh, myCh] = await Promise.all([api.listChallenges().catch(() => []), api.myChallenges().catch(() => [])]);
+  const ch = allCh.find(c => c.status === 'published' && phase(c) === 'live' && myCh.some(m => m.challenge_id === c.id)) || null;
+  const chKm = ch ? await myProgress(ch).catch(() => 0) : 0;
   const events = await api.listEvents({ chapterId: chapters[0]?.chapter_id, limit: 1 }).catch(() => []);
   const ev = events[0] || null;
   const [counts, regs] = ev ? await Promise.all([api.eventCounts([ev.id]).catch(() => ({})), api.myRegistrations([ev.id]).catch(() => [])]) : [{}, []];
@@ -51,6 +56,8 @@ async function paint(body) {
         <a class="btn primary" href="#/programs" style="align-self:flex-start">${esc(t('home.choosePlan'))}</a></div></div>`}
 
     ${plan ? todayCard(plan, pp) : ''}
+
+    ${ch ? `<h2>${esc(t('ch.yours'))}</h2>${challengeCard(ch, { joined: true, mine: chKm })}` : ''}
 
     <h2 class="row between"><span>${esc(t('st.forRunners'))}</span><span class="chip ${str.length >= WEEK_TARGET ? 'ok' : ''}" style="font-family:var(--font)">${esc(t('st.weekCount', { n: str.length, of: WEEK_TARGET }))}</span></h2>
     ${strengthCard(suggestion(!!(pp && pp.next && pp.next.scheduled_date === today())), 'mid')}

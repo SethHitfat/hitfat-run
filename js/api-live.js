@@ -172,6 +172,33 @@ export async function listStrength({ since } = {}) {
     .sort((a, b) => b.started_at.localeCompare(a.started_at));
 }
 
+/* ───────── leaderboard & virtual challenges ─────────
+   Boards come from database functions that only return opted-in names and
+   totals; the runs behind them stay private. Strava runs never count. */
+export async function leaderboard({ from, to, chapterId = null, gpsOnly = false }) {
+  return must(await sb.rpc('run_leaderboard', { p_from: from, p_to: to, p_chapter: chapterId, p_gps_only: gpsOnly })) || [];
+}
+/** Opt in with a board name, or pass null to leave every board at once. */
+export async function setBoard(name) {
+  return saveProfile(name ? { board_name: name.trim(), board_opt_in_at: new Date().toISOString() } : { board_opt_in_at: null });
+}
+export const listChallenges = () => cached('challenges', async () => must(await sb.from('run_challenges').select('*').order('starts_on', { ascending: false }).limit(50)));
+export const getChallenge = id => cached('ch_' + id, async () => must(await sb.from('run_challenges').select('*').eq('id', id).maybeSingle()));
+export async function challengeCounts(ids) {
+  if (!ids.length) return {};
+  const rows = must(await sb.rpc('run_challenge_counts', { p_ids: ids })) || [];
+  return Object.fromEntries(rows.map(r => [r.challenge_id, r.n]));
+}
+export const myChallenges = () => cached('mych', async () => must(await sb.from('run_challenge_entries').select('challenge_id,joined_at').eq('user_id', uid())));
+export async function joinChallenge(id) {
+  const { error } = await sb.from('run_challenge_entries').insert({ challenge_id: id, user_id: uid() });
+  if (error && error.code !== '23505') throw error;
+}
+export async function leaveChallenge(id) { must(await sb.from('run_challenge_entries').delete().eq('challenge_id', id).eq('user_id', uid())); }
+export async function challengeBoard(id) { return must(await sb.rpc('run_challenge_board', { p_challenge: id })) || []; }
+export async function createChallenge(c) { return must(await sb.from('run_challenges').insert({ ...c, created_by: uid() }).select().single()); }
+export async function archiveChallenge(id) { must(await sb.from('run_challenges').update({ status: 'archived' }).eq('id', id)); }
+
 /* ───────── achievements ───────── */
 export async function evaluateAchievements() {
   try { return (must(await sb.rpc('run_evaluate_achievements')) || []).map(r => typeof r === 'string' ? r : r.run_evaluate_achievements); }

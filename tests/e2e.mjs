@@ -23,7 +23,7 @@ const pw = await import(process.env.PLAYWRIGHT || 'playwright'), { chromium } = 
 const psql = (sql, db = DB) => execFileSync('psql', ['-qAtX', '-v', 'ON_ERROR_STOP=1', '-d', db, '-c', sql], { encoding: 'utf8' }).trim();
 const psqlFile = f => execFileSync('psql', ['-qX', '-v', 'ON_ERROR_STOP=1', '-d', DB, '-f', f], { stdio: ['ignore', 'ignore', 'pipe'] });
 psql(`drop database if exists ${DB} with (force)`, 'postgres'); psql(`create database ${DB}`, 'postgres');
-for (const f of ['db/tests/supabase_stub.sql', 'db/001_run_club_phase1.sql', 'db/002_seed_programs.sql', 'db/003_strength.sql']) psqlFile(join(RUN, f));
+for (const f of ['db/tests/supabase_stub.sql', 'db/001_run_club_phase1.sql', 'db/002_seed_programs.sql', 'db/003_strength.sql', 'db/004_leaderboard_challenges.sql']) psqlFile(join(RUN, f));
 psql(`grant usage on schema public to anon, authenticated; grant select on all tables in schema public to authenticated;`);
 
 const users = new Map();   // email → { id, password, meta }
@@ -235,6 +235,20 @@ try {
   await page.evaluate(() => { location.hash = '#/club'; }); await page.waitForSelector('[data-tab=club][aria-current=page]');
   await page.click('[data-tab=home]'); await page.waitForSelector('text=1/2 minggu ini');
   check(true, 'home counts the strength session this week');
+
+  // leaderboard and a virtual challenge, through the real database functions
+  psql(`insert into run_challenges(id, slug, i18n, target_m, starts_on, ends_on) values ('60000000-0000-0000-0000-000000000001', 'e2e-challenge', '{"ms":{"title":"Cabaran E2E"}}', 5000, current_date - 5, current_date + 5)`);
+  const lb = await page.evaluate(async () => { const api = await import('/js/api.js'); const d = new Date(), y = x => x.toISOString().slice(0, 10);
+    const before = await api.leaderboard({ from: y(new Date(d - 6 * 864e5)), to: y(d) });
+    await api.setBoard('Aisyah R');
+    const after = await api.leaderboard({ from: y(new Date(d - 6 * 864e5)), to: y(d) });
+    await api.joinChallenge('60000000-0000-0000-0000-000000000001'); await api.joinChallenge('60000000-0000-0000-0000-000000000001');
+    const counts = await api.challengeCounts(['60000000-0000-0000-0000-000000000001']), board = await api.challengeBoard('60000000-0000-0000-0000-000000000001');
+    return { before: before.length, after, counts, board }; });
+  check(lb.before === 0 && lb.after.length === 1 && lb.after[0].me && lb.after[0].name === 'Aisyah R', 'leaderboard shows Aisyah only after she opts in');
+  check(lb.counts['60000000-0000-0000-0000-000000000001'] === 1 && lb.board.length === 1 && lb.board[0].done, 'challenge joined once (double tap safe), board marks her finished');
+  await page.evaluate(() => { location.hash = '#/challenge/60000000-0000-0000-0000-000000000001'; }); await page.waitForSelector('.ch-medal');
+  check(true, 'finisher medal shown on the challenge page');
 
   // English, dark theme, desktop
   await page.evaluate(() => { location.hash = '#/settings'; }); await page.waitForSelector('[data-lang=en]');

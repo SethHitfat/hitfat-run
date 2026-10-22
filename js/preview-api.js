@@ -192,3 +192,49 @@ export async function guestList(eventId) {
 
 /* ───────── privacy ───────── */
 export async function deleteMyRunData() { db = fresh(); save(); }
+
+/* ───────── leaderboard & challenges ─────────
+   Preview has no other runners, so the boards show a few clearly labelled
+   examples next to you (only once you opt in), as the real board would. */
+const EXAMPLES = [['Aina (contoh)', 1.0], ['Hakim (contoh)', 0.8], ['Mei Ling (contoh)', 0.55], ['Ravi (contoh)', 0.3]];
+const mKL = d => ymd(d);
+const myKm = (from, to, gpsOnly) => db.activities.filter(a => (!gpsOnly || a.source === 'gps') && mKL(a.started_at) >= from && mKL(a.started_at) <= to)
+  .reduce((s, a) => [s[0] + a.distance_m, s[1] + 1], [0, 0]);
+function board(rows) {
+  rows.sort((a, b) => b.km - a.km); let r = 0, last = null;
+  return rows.map((x, i) => { if (x.km !== last) { r = i + 1; last = x.km; } return { ...x, rank: r }; });
+}
+export async function leaderboard({ from, to, gpsOnly = false }) {
+  const span = (dateOf(to) - dateOf(from)) / 864e5 + 1, rows = EXAMPLES.map(([name, perDay]) => ({ name, km: +(perDay * span).toFixed(1), runs: Math.ceil(span / 2.5), me: false }));
+  const [m, n] = myKm(from, to, gpsOnly);
+  if (db.profile?.board_opt_in_at && m > 0) rows.push({ name: db.profile.board_name, km: +(m / 1000).toFixed(1), runs: n, me: true });
+  return board(rows);
+}
+export async function setBoard(name) { return saveProfile(name ? { board_name: name.trim(), board_opt_in_at: now() } : { board_opt_in_at: null }); }
+const CH = [
+  { id: 'preview-ch-10k', slug: 'virtual-10k', target_m: 10000, status: 'published', chapter_id: null, offset: [-21, 9],
+    i18n: { ms: { title: 'Virtual 10K (contoh)', desc: 'Kumpul 10 km dalam tempoh cabaran, di mana-mana sahaja. Semua larian GPS dan manual HITFAT dikira.' },
+            en: { title: 'Virtual 10K (example)', desc: 'Cover 10 km during the challenge, anywhere. Every HITFAT GPS and manual run counts.' } } },
+  { id: 'preview-ch-50k', slug: 'cabaran-50k', target_m: 50000, status: 'published', chapter_id: null, offset: [10, 39],
+    i18n: { ms: { title: 'Cabaran 50KM (contoh)', desc: '50 km dalam sebulan: kira-kira 12 km seminggu.' }, en: { title: '50KM Challenge (example)', desc: '50 km in a month: about 12 km a week.' } } },
+];
+const chOut = c => { const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return ymd(x); }; const { offset, ...rest } = c; return { ...clone(rest), starts_on: d(offset[0]), ends_on: d(offset[1]) }; };
+export async function listChallenges() { return [...(db.challenges || []), ...CH.map(chOut)]; }
+export async function getChallenge(id) { return (await listChallenges()).find(c => c.id === id) || null; }
+export async function challengeCounts(ids) { const e = db.entries || []; return Object.fromEntries(ids.map(id => [id, 23 + e.filter(x => x.challenge_id === id).length])); }
+export async function myChallenges() { return clone(db.entries || []); }
+export async function joinChallenge(id) {
+  const c = await getChallenge(id); if (!c || c.ends_on < ymd(new Date())) fail('Cabaran ini sudah tamat');
+  db.entries = (db.entries || []).filter(x => x.challenge_id !== id).concat({ challenge_id: id, joined_at: now() }); save();
+}
+export async function leaveChallenge(id) { db.entries = (db.entries || []).filter(x => x.challenge_id !== id); save(); }
+export async function challengeBoard(id) {
+  const c = await getChallenge(id); if (!c) return [];
+  const span = Math.max(1, Math.min((Date.now() - dateOf(c.starts_on)) / 864e5, (dateOf(c.ends_on) - dateOf(c.starts_on)) / 864e5 + 1));
+  const rows = c.starts_on > ymd(new Date()) ? [] : EXAMPLES.map(([name, perDay]) => ({ name, km: +(perDay * span).toFixed(1), me: false }));
+  const [m] = myKm(c.starts_on, c.ends_on, false);
+  if (db.profile?.board_opt_in_at && (db.entries || []).some(x => x.challenge_id === id)) rows.push({ name: db.profile.board_name, km: +(m / 1000).toFixed(1), me: true });
+  return board(rows).map(x => ({ ...x, done: x.km * 1000 >= c.target_m }));
+}
+export async function createChallenge() { fail('Tidak tersedia dalam pratonton'); }
+export async function archiveChallenge() { fail('Tidak tersedia dalam pratonton'); }

@@ -109,6 +109,29 @@ try {
   check(/^1/.test(await page.locator('.ring .num').innerText()), 'library ring shows 1 session this week');
   await page.click('[data-tab=home]'); await page.waitForSelector('text=1/2 minggu ini'); check(true, 'home shows 1/2 strength sessions this week');
   await shot('str-home');
+  /* leaderboard (opt-in) and virtual challenges */
+  await page.click('[data-tab=club]'); await page.waitForSelector('.ch-card');
+  check((await page.locator('.hrail .ch-card').count()) === 2, 'two challenges in the Club tab'); await shot('club-challenges');
+  await page.click('.lb-mini'); await page.waitForSelector('.lb-cta');
+  check((await page.locator('.lb-row.me').count()) === 0, 'not on the board before opting in');
+  await page.click('[data-join]'); await page.waitForSelector('#lb-name'); await shot('lb-optin');
+  await page.fill('#lb-name', 'Pelari Ujian'); await page.click('[data-yes]'); await page.waitForSelector('.lb-row.me');
+  check(/Pelari Ujian/.test(await page.locator('.lb-row.me').innerText()), 'on the board with the chosen name after opting in');
+  check(/contoh/.test(await page.locator('.lb-row:not(.me)').first().innerText()), 'preview examples are labelled as examples');
+  await shot('lb-board');
+  const gpsKm = async () => parseFloat(await page.locator('.lb-row.me .lb-km').innerText());
+  const allKm = await gpsKm(); await page.check('[data-gps]'); await page.waitForTimeout(400);
+  check(await gpsKm() < allKm, 'GPS-only leaves out the manual run');
+  await page.click('[data-tab=club]'); await page.waitForSelector('.ch-card'); await page.locator('.hrail .ch-card').filter({ hasText: '10K' }).click();
+  await page.waitForSelector('[data-join]'); await page.click('[data-join]'); await page.waitForSelector('.ch-progress');
+  check(/km/.test(await page.locator('.ch-progress').innerText()), 'challenge progress shown after joining');
+  check((await page.locator('.lb-row.me').count()) === 1, 'me on the challenge board'); await shot('challenge');
+  await page.click('[data-tab=home]'); await page.waitForSelector('text=Cabaran anda'); check(true, 'joined challenge shown on Home');
+  await page.goto(`${ORIGIN}/#/settings`); await page.waitForSelector('[data-board]');
+  check(/Pelari Ujian/.test(await page.locator('#view').innerText()), 'settings shows the board name');
+  await page.click('[data-board]'); await page.click('[data-board-out]'); await page.waitForTimeout(400);
+  await page.goto(`${ORIGIN}/#/leaderboard`); await page.waitForSelector('.lb-cta');
+  check((await page.locator('.lb-row.me').count()) === 0, 'opting out removes me from the board at once');
   await page.click('.preview-bar button'); await page.waitForSelector('#auth-form'); check(true, 'exit preview returns to sign-in');
 } catch (e) { console.error(e.message); failed++; }
 check(supabaseCalls === 0, `no calls to Supabase in preview (${supabaseCalls})`);
