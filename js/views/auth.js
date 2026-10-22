@@ -1,18 +1,18 @@
 import * as api from '../api.js';
 import { t, setLang, lang } from '../i18n.js';
-import { esc, on } from '../ui.js';
+import { esc, on, photoFor, bg } from '../ui.js';
 
 let mode = 'signin';
 export function render(view) {
-  view.innerHTML = `<section class="auth">
-    <div>
-      <div class="row between"><div class="wordmark">HITFAT <b>RUN</b> CLUB</div>
-        <div class="seg" style="width:120px" role="group" aria-label="${esc(t('settings.language'))}">
+  view.innerHTML = `<section class="auth" style="padding-top:0;justify-content:flex-start">
+    <div class="photo auth-hero" ${bg(photoFor({ plan: 'road-to-10k' }), 'display:flex;flex-direction:column;justify-content:space-between')}>
+      <div class="row between"><div class="wordmark" style="color:#fff">HITFAT <b>RUN</b> CLUB</div>
+        <div class="seg" style="width:120px;background:rgba(0,0,0,.45)" role="group" aria-label="${esc(t('settings.language'))}">
           <button data-lang="ms" aria-pressed="${lang() === 'ms'}">BM</button><button data-lang="en" aria-pressed="${lang() === 'en'}">EN</button></div></div>
-      <p class="tag">Run together.<br><b>Train smarter.</b></p>
-      <p class="muted" style="font-size:17px;max-width:30em">${esc(t('auth.pitch'))}</p>
+      <div><p class="tag">Run together.<br><b>Train smarter.</b></p>
+        <p class="muted" style="font-size:16px;max-width:30em;margin:12px 0 0">${esc(t('auth.pitch'))}</p></div>
     </div>
-    <div style="margin-top:32px">
+    <div style="margin-top:24px">
       <button class="btn dark block" data-google>${googleMark} ${esc(t('auth.google'))}</button>
       <div class="muted small" style="text-align:center;margin:18px 0 4px">${esc(t('auth.orEmail'))}</div>
       <form id="auth-form" novalidate>

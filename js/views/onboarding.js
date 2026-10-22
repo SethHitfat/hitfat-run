@@ -3,7 +3,7 @@
 import * as api from '../api.js';
 import { state, go, loadRunner } from '../main.js';
 import { t, L, lang } from '../i18n.js';
-import { esc, on, today, ymd, parseYmd, weekdayShort, weekdayName, fmtDateLong, toast, friendlyError } from '../ui.js';
+import { esc, on, photoFor, bg, today, ymd, parseYmd, weekdayShort, weekdayName, fmtDateLong, toast, friendlyError } from '../ui.js';
 
 const GOALS = ['start', 'first_5k', 'improve_5k', 'first_10k', 'improve_10k', 'half', 'marathon', 'hyrox', 'fitness'];
 const EXPERIENCE = ['none', 'some', 'regular', 'experienced'];
@@ -186,12 +186,12 @@ async function result(view) {
     <h1 class="q" style="margin-top:6px">${esc(t('ob.rec.title', { name: state.name.split(' ')[0] || '' }))}</h1>
     <p class="muted">${esc(t('level.' + level + '.long'))}</p>
     ${a.has_limitations ? `<div class="notice" style="margin:14px 0"><b>${esc(t('ob.lim.noteT'))}</b> ${esc(t('ob.rec.limits'))}</div>` : ''}
-    ${p ? `<div class="hero" style="margin-top:16px">
-        <div class="eyebrow" style="color:#B5B5B5">${esc(t('ob.rec.for'))}</div>
-        <h2 style="margin:6px 0 6px;font-size:30px">${esc(L(p.i18n).title)}</h2>
+    ${p ? `<div class="photo tall" ${bg(photoFor({ plan: p.slug }), 'margin-top:16px')}><div class="in">
+        <div class="eyebrow">${esc(t('ob.rec.for'))}</div>
+        <h2 style="margin:6px 0 6px;font-size:40px">${esc(L(p.i18n).title)}</h2>
         <p class="muted" style="margin:0 0 12px">${esc(L(p.i18n).summary)}</p>
         <div class="row wrap small"><span class="chip">${esc(t('prog.weeks', { n: p.weeks }))}</span><span class="chip">${esc(t('prog.perWeek', { n: p.sessions_per_week }))}</span><span class="chip">${esc(t('level.' + p.level))}</span></div>
-      </div>
+      </div></div>
       ${rec.note ? `<div class="notice info small" style="margin-top:12px">${esc(rec.note)}</div>` : ''}
       ${weeksToRace != null && weeksToRace < p.weeks ? `<div class="notice small" style="margin-top:12px">${esc(t('ob.rec.raceSoon', { w: Math.max(0, weeksToRace), n: p.weeks }))}</div>` : ''}
       <div id="start-box" style="margin-top:20px"></div>

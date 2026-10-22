@@ -1,33 +1,37 @@
 // One scheduled session: what to do, why, and how it went.
 import * as api from '../api.js';
-import { go, back } from '../main.js';
+import { state, go, back } from '../main.js';
 import { t, L } from '../i18n.js';
-import { esc, on, mount, icon, fmtDateLong, today, skeleton, errorBox, emptyState, toast, confirmSheet, openSheet, closeSheet, friendlyError } from '../ui.js';
+import { esc, on, mount, icon, photoFor, bg, fmtDateLong, today, skeleton, errorBox, emptyState, toast, confirmSheet, openSheet, closeSheet, friendlyError } from '../ui.js';
 import { stepBars } from './training.js';
 
+const backBtn = `<button class="icon-btn" data-back aria-label="${esc(t('common.back'))}" style="background:rgba(0,0,0,.45);color:#fff">${icon('back')}</button>`;
 export const RUN_CATS = ['easy', 'recovery', 'long', 'tempo', 'threshold', 'interval', 'hill', 'run_walk'];
 
 export async function render(view, id) {
-  view.innerHTML = `<header class="topbar"><button class="icon-btn" data-back aria-label="${esc(t('common.back'))}">${icon('back')}</button></header><div id="w-body">${skeleton(3, 120)}</div>`;
-  view.querySelector('[data-back]').onclick = () => back('training');
+  view.innerHTML = `<div id="w-body">${skeleton(3, 120)}</div>`;
   const body = view.querySelector('#w-body');
+  // the back button lives in the photo header, which is repainted; one delegated listener covers every paint
+  view.addEventListener('click', e => { if (e.target.closest('[data-back]')) back('training'); });
   try { await paint(body, id); }
   catch (e) { console.error(e); body.innerHTML = errorBox(e, true); body.querySelector('[data-retry]').onclick = () => render(view, id); }
 }
 
 async function paint(body, id) {
   const s = await api.getSession(id);
-  if (!s) { body.innerHTML = `<div class="card">${emptyState(t('wo.missingT'), t('wo.missing'))}</div>`; return; }
+  if (!s) { body.innerHTML = `<header class="topbar">${backBtn}</header><div class="card">${emptyState(t('wo.missingT'), t('wo.missing'))}</div>`; return; }
   const tp = s.template, x = L(tp.i18n), prog = s.enrollment?.program, isRun = RUN_CATS.includes(tp.category);
   const missed = s.status === 'planned' && s.scheduled_date < today();
   const act = s.activity_id ? await api.getActivity(s.activity_id).catch(() => null) : null;
 
   const root = mount(body, `
-    <div class="eyebrow">${esc(prog ? L(prog.i18n).title : '')} · ${esc(t('plan.weekSession', { w: tp.week, s: tp.session }))}</div>
-    <h1 style="margin:6px 0 8px">${esc(x.title)}</h1>
-    <div class="row wrap"><span class="chip red">${esc(t('cat.' + tp.category))}</span>
-      <span class="chip ${s.status === 'completed' ? 'ok' : missed ? 'warn' : ''}">${esc(t('status.' + (missed ? 'missed' : s.status)))}</span>
-      <span class="muted small">${esc(fmtDateLong(s.scheduled_date))}</span></div>
+    <div class="photo bleed" ${bg(photoFor({ category: tp.category, treadmill: state.profile?.training_location === 'treadmill' }), 'min-height:340px')}><div class="in" style="padding-top:calc(16px + var(--safe-t));justify-content:space-between">
+      <div>${backBtn}</div>
+      <div><div class="eyebrow">${esc(prog ? L(prog.i18n).title : '')} · ${esc(t('plan.weekSession', { w: tp.week, s: tp.session }))}</div>
+        <h1 style="margin:6px 0 10px;font-size:44px">${esc(x.title)}</h1>
+        <div class="row wrap"><span class="chip red">${esc(t('cat.' + tp.category))}</span>
+          <span class="chip ${s.status === 'completed' ? 'ok' : missed ? 'warn' : ''}">${esc(t('status.' + (missed ? 'missed' : s.status)))}</span>
+          <span class="chip">${esc(fmtDateLong(s.scheduled_date))}</span></div></div></div></div>
 
     <div class="card" style="margin-top:16px"><div class="metrics">
       ${tp.duration_min ? `<div class="metric"><div class="num">${tp.duration_min}<span class="small"> min</span></div><div class="l">${esc(t('wo.duration'))}</div></div>` : ''}

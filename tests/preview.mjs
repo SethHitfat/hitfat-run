@@ -25,15 +25,15 @@ try {
   await page.click('[data-next]'); await page.click('[data-skip]'); await pick('[data-pick=weekly_km_recent][data-v="3"]');
   await pick('[data-pick=has_limitations][data-v=false]'); await pick('[data-pick=training_location][data-v=road]');
   await page.waitForSelector('#start-box [data-go]');
-  check(/Road to 5KM/i.test(await page.locator('.hero h2').innerText()), 'Road to 5KM recommended');
-  await page.click('#start-box [data-go]'); await page.waitForSelector('#view a.hero:has-text("Road to 5KM")');
+  check(/Road to 5KM/i.test(await page.locator('.photo h2').innerText()), 'Road to 5KM recommended');
+  await page.click('#start-box [data-go]'); await page.waitForSelector('#view a.photo:has-text("Road to 5KM")');
   await page.click('[data-tab=training]'); await page.locator('a.sess').first().click(); await page.click('[data-log]');
   await page.fill('#lf-dist', '2.5'); await page.fill('#lf-m', '18'); await page.click('[data-feel=right]'); await page.click('#log-form [type=submit]');
   await page.waitForSelector('.celebrate'); check((await page.locator('.celebrate h2').count()) === 2, 'two first badges awarded'); await page.click('[data-ok]');
   await page.click('[data-tab=club]'); await page.click('text=Larian Pagi Sabtu (contoh)'); await page.click('[data-rsvp="1"]');
   await page.waitForSelector('text=Anda berdaftar'); check(true, 'RSVP to the example run');
   await page.reload(); await page.waitForSelector('.preview-bar'); await page.click('[data-tab=home]');
-  await page.waitForSelector('#view a.hero:has-text("Road to 5KM")'); check(/2\.5\s*km/.test(await page.locator('#view').innerText()), 'data kept after reload');
+  await page.waitForSelector('#view a.photo:has-text("Road to 5KM")'); check((await page.locator('#view .card .huge-num').first().innerText()) === '2.5', 'data kept after reload');
   await page.click('.preview-bar button'); await page.waitForSelector('#auth-form'); check(true, 'exit preview returns to sign-in');
 } catch (e) { console.error(e.message); failed++; }
 check(supabaseCalls === 0, `no calls to Supabase in preview (${supabaseCalls})`);

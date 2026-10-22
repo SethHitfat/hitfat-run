@@ -118,3 +118,13 @@ export function icon(name, extra = '') {
   const filled = name === 'play' || name === 'pause' || name === 'stop';
   return `<svg viewBox="0 0 24 24" aria-hidden="true" ${filled ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} ${extra}>${P[name] || ''}</svg>`;
 }
+
+/* HITFAT's own running photos: each plan and session type gets the one that fits it. */
+const PHOTO = { park: '/img/run-park.jpg', track: '/img/run-track.jpg', city: '/img/run-city.jpg', sprint: '/img/run-sprint.jpg', treadmill: '/img/run-treadmill.jpg' };
+const BY_PLAN = { 'couch-to-5k': 'park', 'road-to-5k': 'track', 'improve-5k': 'sprint', 'road-to-10k': 'city' };
+const BY_CATEGORY = { easy: 'park', recovery: 'park', run_walk: 'park', long: 'city', tempo: 'track', threshold: 'track', interval: 'sprint', hill: 'sprint' };
+export function photoFor({ plan, category, treadmill } = {}) {
+  if (treadmill) return PHOTO.treadmill;
+  return PHOTO[BY_PLAN[plan] || BY_CATEGORY[category] || 'track'];
+}
+export const bg = (url, extra = '') => `style="background-image:url('${url}');${extra}"`;

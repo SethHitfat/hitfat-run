@@ -4,30 +4,25 @@
    system, and either can be forced from Profile.
    ═══════════════════════════════════════════════════════════════ */
 :root{
-  --red:#E30613; --red-ink:#FFFFFF; --red-text:#C40511; --red-soft:#FDECEE;
-  --ink:#111111; --bg:#FFFFFF; --surface:#F4F4F4; --surface-2:#EAEAEA; --line:#E2E2E2;
-  --text:#111111; --muted:#5F5F5F; --faint:#8A8A8A;
-  --ok:#137F3B; --ok-soft:#E5F4EA; --warn:#9A6200; --warn-soft:#FFF4DD; --err:#B3261E;
-  --r:16px; --r-sm:12px; --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);
+  /* Dark is the default, like a night run: black page, red accent, white type. */
+  --red:#E30613; --red-ink:#FFFFFF; --red-text:#FF3B47; --red-soft:#3A0A0E;
+  --ink:#111111; --bg:#000000; --surface:#121212; --surface-2:#1E1E1E; --line:#262626;
+  --text:#FFFFFF; --muted:#A3A3A3; --faint:#6F6F6F;
+  --ok:#4ADE80; --ok-soft:#0F2A18; --warn:#FBBF24; --warn-soft:#2E2208; --err:#FF8A80;
+  --r:20px; --r-sm:14px; --shadow:none;
   --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
   --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --display:Oswald,"Arial Narrow",Impact,sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:dark;
+}
+/* Light, chosen in Profile → Settings (or "device" on a light-mode phone) */
+:root[data-theme="light"]{
+  --red-text:#C40511; --red-soft:#FDECEE;
+  --bg:#FFFFFF; --surface:#F4F4F4; --surface-2:#EAEAEA; --line:#E2E2E2;
+  --text:#111111; --muted:#5F5F5F; --faint:#8A8A8A;
+  --ok:#137F3B; --ok-soft:#E5F4EA; --warn:#9A6200; --warn-soft:#FFF4DD; --err:#B3261E;
+  --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);
   color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --red-text:#FF4D57; --red-soft:#3A0A0E;
-    --bg:#0B0B0B; --surface:#161616; --surface-2:#202020; --line:#2A2A2A;
-    --text:#FFFFFF; --muted:#A8A8A8; --faint:#7A7A7A;
-    --ok:#4ADE80; --ok-soft:#0F2A18; --warn:#FBBF24; --warn-soft:#2E2208; --err:#FF8A80;
-    --shadow:none; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --red-text:#FF4D57; --red-soft:#3A0A0E;
-  --bg:#0B0B0B; --surface:#161616; --surface-2:#202020; --line:#2A2A2A;
-  --text:#FFFFFF; --muted:#A8A8A8; --faint:#7A7A7A;
-  --ok:#4ADE80; --ok-soft:#0F2A18; --warn:#FBBF24; --warn-soft:#2E2208; --err:#FF8A80;
-  --shadow:none; color-scheme:dark;
 }
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -234,3 +229,46 @@ input[type=range]{ padding:0; min-height:40px; background:none; border:0; accent
 .acc.good i{ background:#4ADE80; } .acc.ok i{ background:#FBBF24; } .acc.bad i{ background:#FF5A5A; }
 .map{ height:240px; border-radius:var(--r); overflow:hidden; background:var(--surface); isolation:isolate; }
 .leaflet-container{ font-family:var(--font); }
+
+/* ═══════════ bold layer: photography, big numbers, motion ═══════════ */
+h1{ font-size:40px; } h2{ font-size:24px; }
+.big{ font-size:88px; letter-spacing:-.01em; }
+.huge-num{ font-family:var(--display); font-weight:700; font-size:clamp(72px,24vw,120px); line-height:.86; font-variant-numeric:tabular-nums; }
+
+/* a card or header with a running photo behind it; text sits on a dark fade */
+.photo{ position:relative; overflow:hidden; border-radius:var(--r); background:#111 center/cover no-repeat; color:#fff; isolation:isolate; display:block; text-decoration:none; }
+.photo::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.35) 45%,rgba(0,0,0,.88) 100%); }
+.photo .in{ padding:20px; display:flex; flex-direction:column; justify-content:flex-end; min-height:inherit; }
+.photo .muted,.photo .eyebrow{ color:rgba(255,255,255,.75); }
+.photo .bar{ background:rgba(255,255,255,.22); } .photo .bar i{ background:#fff; }
+.photo .weeks i{ background:rgba(255,255,255,.22); } .photo .weeks i.done{ background:#fff; } .photo .weeks i.now{ background:var(--red); }
+.photo.tall{ min-height:300px; } .photo.mid{ min-height:220px; } .photo.short{ min-height:150px; }
+.photo.bleed{ border-radius:0; margin:calc(-12px - var(--safe-t)) -16px 0; }
+@media (min-width:900px){ .photo.bleed{ margin:-12px 0 0; border-radius:var(--r); } }
+.photo .chip{ background:rgba(0,0,0,.45); color:#fff; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.photo .chip.red{ background:var(--red); color:#fff; }
+
+/* the "today" card: one big number and a round start button */
+.today{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; }
+.go-btn{ width:76px; height:76px; border-radius:50%; flex:none; display:grid; place-items:center; background:var(--red); color:#fff;
+  font-family:var(--display); font-weight:700; font-size:18px; letter-spacing:.04em; box-shadow:0 0 0 8px rgba(227,6,19,.18); }
+
+/* stat rows read as one strip of large numbers */
+.strip{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.strip .num{ font-size:34px; }
+.strip .l{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-top:6px; }
+
+.auth-hero{ min-height:58vh; margin:calc(-12px - var(--safe-t)) -16px 0; padding:calc(20px + var(--safe-t)) 20px 28px; }
+.auth-hero .tag{ color:#fff; font-size:52px; margin:0; }
+@media (min-width:900px){ .auth-hero{ margin:0; border-radius:var(--r); } }
+
+/* motion, kept short and switched off for reduced-motion users */
+main > *{ animation:rise .32s var(--ease) both; }
+@keyframes rise{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+.bar i{ transition:width .6s var(--ease); }
+.celebrate .ic{ animation:pop .5s var(--ease) both; }
+@keyframes pop{ 0%{ transform:scale(.4); opacity:0; } 70%{ transform:scale(1.08); opacity:1; } 100%{ transform:scale(1); } }
+.card.tap,.photo{ transition:transform .15s var(--ease); }
+.card.tap:active,a.photo:active{ transform:scale(.985); }
+@media (prefers-reduced-motion:reduce){ main > *,.celebrate .ic{ animation:none; } .bar i{ transition:none; } }
+.tabs{ background:color-mix(in srgb,var(--bg) 88%,transparent); }

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>HITFAT RUN CLUB</title>
 <meta name="description" content="Kelab larian HITFAT: pelan latihan berstruktur, larian komuniti dan kemajuan anda. Run together. Train smarter.">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HITFAT RUN">
@@ -18,7 +18,9 @@
 <link rel="stylesheet" href="/app.css">
 <script>
   /* apply the saved theme before first paint, so there is no flash */
-  try{ const t=localStorage.getItem('hfrun_theme'); if(t==='light'||t==='dark') document.documentElement.dataset.theme=t; }catch(e){}
+  /* dark unless the runner chose light, or "device" on a light-mode phone */
+  try{ const t=localStorage.getItem('hfrun_theme');
+    if(t==='light'||(t==='system'&&matchMedia('(prefers-color-scheme: light)').matches)) document.documentElement.dataset.theme='light'; }catch(e){}
 </script>
 </head>
 <body>

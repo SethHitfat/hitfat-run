@@ -2,7 +2,7 @@
 import * as api from '../api.js';
 import { state, go, isStaff } from '../main.js';
 import { t, L } from '../i18n.js';
-import { esc, on, mount, icon, today, fmtDate, fmtDateLong, weekdayName, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
+import { esc, on, mount, icon, photoFor, bg, today, fmtDate, fmtDateLong, weekdayName, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
 import { planProgress } from '../stats.js';
 
 export const sessionTitle = s => L(s.template.i18n).title;
@@ -38,13 +38,13 @@ async function paint(body) {
   const byWeek = {};
   plan.sessions.forEach(s => (byWeek[s.template.week] = byWeek[s.template.week] || []).push(s));
 
-  const root = mount(body, `<div class="hero">
-      <div class="eyebrow" style="color:#B5B5B5">${esc(t('train.current'))}</div>
-      <h2 style="margin:6px 0 4px;font-size:28px">${esc(L(plan.program.i18n).title)}</h2>
+  const root = mount(body, `<div class="photo mid" ${bg(photoFor({ plan: plan.program.slug }))}><div class="in">
+      <div class="eyebrow">${esc(t('train.current'))}</div>
+      <h2 style="margin:6px 0 4px;font-size:36px">${esc(L(plan.program.i18n).title)}</h2>
       <div class="muted small">${esc(t('train.since', { d: fmtDateLong(plan.start_date) }))} · ${esc(plan.weekdays.map(d => weekdayName(d)).join(', '))}</div>
       <div class="bar" style="margin-top:14px"><i style="width:${(pp.done / pp.total * 100).toFixed(1)}%"></i></div>
       <div class="row between small" style="margin-top:8px"><span>${esc(t('home.weekOf', { w: pp.week, n: pp.weeks }))}</span><span>${esc(t('home.sessionsDone', { d: pp.done, n: pp.total }))}</span></div>
-    </div>
+    </div></div>
     ${pp.missed.length ? `<div class="notice" style="margin-top:12px"><b>${esc(t('plan.missed', { n: pp.missed.length }))}</b> ${esc(t('plan.missedHelp'))}
       <div style="margin-top:10px"><button class="btn sm dark" data-resched>${esc(t('plan.reschedule'))}</button></div></div>` : ''}
     <div class="row wrap" style="margin-top:12px">

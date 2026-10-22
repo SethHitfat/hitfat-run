@@ -22,7 +22,8 @@ export async function render(view) {
     const all = totals(acts), wk = thisWeek(acts), mo = thisMonth(acts), cons = consistency(acts, 4), pb = bests(acts), series = weeklySeries(acts, 8);
     const got = Object.fromEntries(earned.map(e => [e.code, e.earned_at]));
     mount(body, `
-      <h2 style="margin-top:8px">${esc(t('prof.progress'))}</h2>
+      <div style="margin:4px 0 8px"><div class="huge-num">${km(all.dist, 1)}</div><div class="eyebrow" style="margin-top:6px">${esc(t('prof.totalKm'))}</div></div>
+      <h2 style="margin-top:22px">${esc(t('prof.progress'))}</h2>
       <div class="card">
         <div class="metrics three">
           <div class="metric"><div class="num">${km(wk.dist, 1)}</div><div class="l">${esc(t('prof.weekKm'))}</div></div>
@@ -86,11 +87,11 @@ export async function history(view) {
 
 /* ───────── settings ───────── */
 export async function settings(view) {
-  const theme = (() => { try { return localStorage.getItem('hfrun_theme') || 'system'; } catch (e) { return 'system'; } })();
+  const theme = (() => { try { return localStorage.getItem('hfrun_theme') || 'dark'; } catch (e) { return 'dark'; } })();
   view.innerHTML = `<div><header class="topbar"><div class="row">${backBtn}<h1>${esc(t('settings.title'))}</h1></div></header>
     <div class="card list" id="st">
       <div><label style="margin-top:0">${esc(t('settings.language'))}</label><div class="seg"><button data-lang="ms" aria-pressed="${lang() === 'ms'}">Bahasa Malaysia</button><button data-lang="en" aria-pressed="${lang() === 'en'}">English</button></div></div>
-      <div><label style="margin-top:0">${esc(t('settings.theme'))}</label><div class="seg">${['system', 'light', 'dark'].map(x => `<button data-theme="${x}" aria-pressed="${theme === x}">${esc(t('theme.' + x))}</button>`).join('')}</div></div>
+      <div><label style="margin-top:0">${esc(t('settings.theme'))}</label><div class="seg">${['dark', 'light', 'system'].map(x => `<button data-theme="${x}" aria-pressed="${theme === x}">${esc(t('theme.' + x))}</button>`).join('')}</div></div>
       <div class="row between"><div><div style="font-weight:700">${esc(t('settings.name'))}</div><div class="muted small">${esc(state.name)}</div></div><button class="btn sm" data-name>${esc(t('common.edit'))}</button></div>
       <div class="row between"><div><div style="font-weight:700">${esc(t('settings.runProfile'))}</div><div class="muted small">${esc(t('settings.runProfileHelp'))}</div></div><button class="btn sm" data-ob>${esc(t('common.edit'))}</button></div>
     </div>
@@ -113,8 +114,9 @@ export async function settings(view) {
   });
   on(root, '[data-theme]', 'click', (e, b) => {
     const v = b.dataset.theme;
-    try { v === 'system' ? localStorage.removeItem('hfrun_theme') : localStorage.setItem('hfrun_theme', v); } catch (x) {}
-    if (v === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
+    try { v === 'dark' ? localStorage.removeItem('hfrun_theme') : localStorage.setItem('hfrun_theme', v); } catch (x) {}
+    const light = v === 'light' || (v === 'system' && matchMedia('(prefers-color-scheme: light)').matches);
+    if (light) document.documentElement.dataset.theme = 'light'; else delete document.documentElement.dataset.theme;
     root.querySelectorAll('[data-theme]').forEach(x => x.setAttribute('aria-pressed', x === b));
   });
   on(root, '[data-name]', 'click', () => {

@@ -2,7 +2,7 @@
 import * as api from '../api.js';
 import { state, go, back, isStaff, canManageChapter } from '../main.js';
 import { t } from '../i18n.js';
-import { esc, on, mount, icon, fmtDate, fmtDateLong, fmtTime, localInput, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
+import { esc, on, mount, icon, photoFor, bg, fmtDate, fmtDateLong, fmtTime, localInput, skeleton, errorBox, emptyState, toast, confirmSheet, friendlyError } from '../ui.js';
 
 const backBtn = `<button class="icon-btn" data-back aria-label="${esc(t('common.back'))}">${icon('back')}</button>`;
 
@@ -24,13 +24,13 @@ async function paint(body) {
   const past = history.filter(h => h.event && Date.parse(h.event.starts_at) < Date.now()).sort((a, b) => b.event.starts_at.localeCompare(a.event.starts_at));
 
   const root = mount(body, `
-    ${chapters.map(c => `<div class="hero ${member.has(c.id) ? '' : 'red'}" style="margin-bottom:12px">
-      <div class="eyebrow" style="color:${member.has(c.id) ? '#B5B5B5' : '#FFE3E5'}">${esc(t('club.chapter'))}</div>
-      <h2 style="margin:6px 0 4px;font-size:26px">${esc(c.name)}</h2>
+    ${chapters.map(c => `<div class="photo tall" ${bg(photoFor({ plan: 'road-to-10k' }), 'margin-bottom:12px')}><div class="in">
+      <div class="eyebrow">${esc(t('club.chapter'))}</div>
+      <h2 style="margin:6px 0 4px;font-size:36px">${esc(c.name)}</h2>
       <div class="muted small">${esc([c.city, c.state].filter(Boolean).join(', '))}</div>
       <div style="margin-top:14px">${member.has(c.id)
         ? `<span class="chip ok">${icon('check', 'width="14" height="14"')} ${esc(t('club.member'))}</span> <button class="btn sm ghost" style="color:#fff;border-color:#444;margin-left:6px" data-leave="${c.id}">${esc(t('club.leave'))}</button>`
-        : `<button class="btn sm" style="background:#fff;color:#111" data-join="${c.id}">${esc(t('club.join'))}</button>`}</div></div>`).join('')}
+        : `<button class="btn primary" data-join="${c.id}">${esc(t('club.join'))}</button>`}</div></div></div>`).join('')}
 
     <h2>${esc(t('club.upcoming'))}</h2>
     ${events.length ? events.map(e => eventCard(e, counts[e.id] || 0, going.has(e.id))).join('')
@@ -51,12 +51,12 @@ async function paint(body) {
 
 function eventCard(e, n, going) {
   const left = e.capacity ? Math.max(0, e.capacity - n) : null;
-  return `<a class="card tap" href="#/event/${e.id}" style="text-decoration:none">
+  return `<a class="photo mid" href="#/event/${e.id}" ${bg(photoFor({ category: 'tempo' }), 'margin-bottom:12px')}><div class="in">
     <div class="row between"><span class="chip red">${esc(fmtDate(e.starts_at))} · ${esc(fmtTime(e.starts_at))}</span>
       ${e.status === 'cancelled' ? `<span class="chip warn">${esc(t('club.cancelled'))}</span>` : going ? `<span class="chip ok">${icon('check', 'width="14" height="14"')} ${esc(t('club.going'))}</span>` : left === 0 ? `<span class="chip">${esc(t('club.fullShort'))}</span>` : ''}</div>
     <h3 style="margin:10px 0 4px;font-size:20px">${esc(e.title)}</h3>
     <div class="muted small row" style="gap:6px">${icon('pin', 'width="16" height="16" style="flex:none"')}<span class="ellipsis">${esc(e.meeting_point)}</span></div>
-    <div class="muted small" style="margin-top:4px">${esc(t('club.goingN', { n }))}${left != null ? ' · ' + esc(t('club.spots', { n: left })) : ''}${e.distance_text ? ' · ' + esc(e.distance_text) : ''}</div></a>`;
+    <div class="muted small" style="margin-top:4px">${esc(t('club.goingN', { n }))}${left != null ? ' · ' + esc(t('club.spots', { n: left })) : ''}${e.distance_text ? ' · ' + esc(e.distance_text) : ''}</div></div></a>`;
 }
 
 /* ───────── one event ───────── */

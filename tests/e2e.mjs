@@ -109,6 +109,7 @@ async function signIn(page, email, password) {
   await page.click('#auth-form [type=submit]');
 }
 const text = page => page.locator('#view').innerText();
+const weekKm = page => page.locator('#view .card .huge-num').first().innerText();   // the week's distance on Home
 
 try {
   /* 1. Head coach publishes the plans */
@@ -160,7 +161,7 @@ try {
   await page.click('[data-next]');
   await pick('[data-pick=training_location][data-v=road]');
   await page.waitForSelector('#start-box [data-go]'); await shot(page, '06-recommendation');
-  const recTitle = await page.locator('.hero h2').innerText();
+  const recTitle = await page.locator('.photo h2').innerText();
   check(/Couch to 5KM/i.test(recTitle), `limitations + 10 min → gentler plan recommended (${recTitle})`);
   check(psql(`select health_consent_at is not null from run_profiles p join auth.users u on u.id=p.user_id where u.email='aisyah@test.my'`) === 't', 'consent timestamp stored with health info');
   // she prefers the 5K plan: browse and pick it instead
@@ -171,10 +172,10 @@ try {
   const badDays = psql(`select count(*) from run_scheduled_workouts sw join auth.users u on u.id=sw.user_id where u.email='aisyah@test.my' and extract(dow from scheduled_date) not in (1,3,6)`);
   check(nSess === '18' && badDays === '0', `calendar: ${nSess} sessions, all on Mon/Wed/Sat`);
 
-  await page.click('[data-tab=home]'); await page.waitForSelector('#view a.hero:has-text("Road to 5KM")'); await shot(page, '09-home-start');
+  await page.click('[data-tab=home]'); await page.waitForSelector('#view a.photo:has-text("Road to 5KM")'); await shot(page, '09-home-start');
   const home = await text(page);
   check(/Minggu 1 daripada 6/.test(home), 'home shows "Minggu 1 daripada 6"');
-  check(/0\.0\s*km/i.test(home), 'home weekly distance starts at zero (no invented data)');
+  check((await weekKm(page)) === '0.0', 'home weekly distance starts at zero (no invented data)');
 
   // open the first session and complete it with a logged run
   await page.click('[data-tab=training]'); await page.locator('a.sess').first().click();
@@ -192,9 +193,9 @@ try {
   check(psql(`select status from run_scheduled_workouts where seq=1 and user_id=(select id from auth.users where email='aisyah@test.my')`) === 'completed', 'session marked completed and linked');
 
   // progress on home
-  await page.click('[data-tab=home]'); await page.waitForSelector('#view a.hero:has-text("Road to 5KM")');
+  await page.click('[data-tab=home]'); await page.waitForSelector('#view a.photo:has-text("Road to 5KM")');
   const home2 = await text(page);
-  check(/2\.6\s*km/.test(home2) && /1\/18 sesi/.test(home2), 'home progress updated (2.6 km, 1/18 sessions)');
+  check((await weekKm(page)) === '2.6' && /1\/18 sesi/.test(home2), 'home progress updated (2.6 km, 1/18 sessions)');
   await shot(page, '13-home-progress');
 
   // duplicate guard
@@ -219,8 +220,8 @@ try {
   await page.fill('#lf-dist', '3.1'); await page.fill('#lf-m', '24'); await page.click('#log-form [type=submit]');
   await page.waitForSelector('text=Disimpan dalam peranti');
   check(psql(`select count(*) from run_activities`) === '1', 'offline run not sent yet');
-  await page.waitForSelector('#view a.hero:has-text("Road to 5KM")');
-  check(/5\.7\s*km/.test(await text(page)), 'home still readable offline, including the queued run (5.7 km)');
+  await page.waitForSelector('#view a.photo:has-text("Road to 5KM")');
+  check((await weekKm(page)) === '5.7', 'home still readable offline, including the queued run (5.7 km)');
   await ctx.setOffline(false); networkDown = false; await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await page.waitForTimeout(1500);
   check(psql(`select count(*) from run_activities`) === '2', 'offline run synced once back online');

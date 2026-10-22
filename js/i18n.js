@@ -104,7 +104,7 @@ ms: {
 
   'wo.mins': '{n} min', 'wo.rpe': 'RPE {a}–{b}', 'wo.duration': 'Tempoh', 'wo.distance': 'Jarak', 'wo.intensity': 'Intensiti', 'wo.rpeTarget': 'Sasaran usaha',
   'wo.hrZone': 'Zon nadi', 'wo.rest': 'Rehat', 'wo.objective': 'Objektif', 'wo.howto': 'Cara buat', 'wo.warmup': 'Memanaskan badan', 'wo.main': 'Sesi utama',
-  'wo.cooldown': 'Menyejukkan badan', 'wo.coach': 'Nota coach', 'wo.video': 'Video demonstrasi', 'wo.open': 'Buka sesi', 'wo.view': 'Lihat sesi',
+  'wo.cooldown': 'Menyejukkan badan', 'wo.coach': 'Nota coach', 'wo.video': 'Video demonstrasi', 'wo.open': 'Buka sesi', 'wo.go': 'MULA', 'wo.view': 'Lihat sesi',
   'wo.doneLog': 'Siap: rekod larian', 'wo.gps': 'Rekod dengan GPS (eksperimen)', 'wo.markDone': 'Tandakan selesai', 'wo.skip': 'Langkau sesi',
   'wo.skipQ': 'Langkau sesi ini?', 'wo.skipHelp': 'Tak mengapa sekali-sekala. Sesi seterusnya kekal mengikut jadual.', 'wo.skipped': 'Sesi dilangkau',
   'wo.result': 'Keputusan anda', 'wo.seeRun': 'Lihat larian ({km} km)', 'wo.undo': 'Batal tanda selesai', 'wo.unskip': 'Buat semula sesi ini',
@@ -274,7 +274,7 @@ en: {
 
   'wo.mins': '{n} min', 'wo.rpe': 'RPE {a}–{b}', 'wo.duration': 'Duration', 'wo.distance': 'Distance', 'wo.intensity': 'Intensity', 'wo.rpeTarget': 'Target effort',
   'wo.hrZone': 'Heart-rate zone', 'wo.rest': 'Rest', 'wo.objective': 'Objective', 'wo.howto': 'How to do it', 'wo.warmup': 'Warm-up', 'wo.main': 'Main set',
-  'wo.cooldown': 'Cool-down', 'wo.coach': 'Coach notes', 'wo.video': 'Demonstration video', 'wo.open': 'Open session', 'wo.view': 'View session',
+  'wo.cooldown': 'Cool-down', 'wo.coach': 'Coach notes', 'wo.video': 'Demonstration video', 'wo.open': 'Open session', 'wo.go': 'GO', 'wo.view': 'View session',
   'wo.doneLog': 'Done: log my run', 'wo.gps': 'Record with GPS (experimental)', 'wo.markDone': 'Mark as done', 'wo.skip': 'Skip session',
   'wo.skipQ': 'Skip this session?', 'wo.skipHelp': 'Fine once in a while. The next sessions stay on schedule.', 'wo.skipped': 'Session skipped',
   'wo.result': 'Your result', 'wo.seeRun': 'See run ({km} km)', 'wo.undo': 'Undo done', 'wo.unskip': 'Do this session after all',
