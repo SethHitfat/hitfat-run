@@ -8,7 +8,8 @@ const pw = await import(process.env.PLAYWRIGHT || 'playwright'), { chromium } = 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png' };
 const browser = await chromium.launch({ proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY } : undefined });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
-let supabaseCalls = 0;
+let supabaseCalls = 0, supabaseLib = 0, libInPreview = -1;
+ctx.on('request', r => { if (r.url().includes('supabase-js')) supabaseLib++; });
 await ctx.route('https://auth.hitfat.io/**', r => { supabaseCalls++; r.abort(); });
 await ctx.route(`${ORIGIN}/**`, r => { let p = new URL(r.request().url()).pathname; if (p.endsWith('/')) p += 'index.html';
   const f = join(ROOT, p); return existsSync(f) ? r.fulfill({ status: 200, contentType: TYPES[extname(f)] || 'application/octet-stream', body: readFileSync(f) }) : r.fulfill({ status: 404 }); });
@@ -26,7 +27,7 @@ const shot = async n => { await page.waitForTimeout(500); return page.screenshot
 const errors = []; page.on('pageerror', e => errors.push(e.message));
 let failed = 0; const check = (ok, what) => { console.log(`${ok ? '✓' : '✗'} ${what}`); if (!ok) failed++; };
 try {
-  await page.goto(`${ORIGIN}/`); await page.click('[data-preview]');
+  await page.goto(`${ORIGIN}/`); await page.waitForTimeout(500); supabaseLib = 0; await page.click('[data-preview]');
   await page.waitForSelector('.ob'); check(await page.locator('.preview-bar').isVisible(), 'preview banner shown');
   const pick = async s => { await page.click(s); await page.click('[data-next]'); };
   await pick('[data-pick=goal][data-v=first_5k]'); await pick('[data-pick=experience][data-v=some]');
@@ -35,15 +36,15 @@ try {
   await page.click('[data-next]'); await page.click('[data-skip]'); await pick('[data-pick=weekly_km_recent][data-v="3"]');
   await pick('[data-pick=has_limitations][data-v=false]'); await pick('[data-pick=training_location][data-v=road]');
   await page.waitForSelector('#start-box [data-go]');
-  check(/Road to 5KM/i.test(await page.locator('.photo h2').innerText()), 'Road to 5KM recommended');
-  await page.click('#start-box [data-go]'); await page.waitForSelector('#view a.photo:has-text("Road to 5KM")');
+  check(/Menuju 5KM/i.test(await page.locator('.photo h2').innerText()), 'Menuju 5KM recommended');
+  await page.click('#start-box [data-go]'); await page.waitForSelector('#view a.photo:has-text("Menuju 5KM")');
   await page.click('[data-tab=training]'); await page.locator('a.sess').first().click(); await page.click('[data-log]');
   await page.fill('#lf-dist', '2.5'); await page.fill('#lf-m', '18'); await page.click('[data-feel=right]'); await page.click('#log-form [type=submit]');
   await page.waitForSelector('.celebrate'); check((await page.locator('.celebrate h2').count()) === 2, 'two first badges awarded'); await page.click('[data-ok]');
   await page.click('[data-tab=club]'); await page.click('text=Larian Pagi Sabtu (contoh)'); await page.click('[data-rsvp="1"]');
   await page.waitForSelector('text=Anda berdaftar'); check(true, 'RSVP to the example run');
   await page.reload(); await page.waitForSelector('.preview-bar'); await page.click('[data-tab=home]');
-  await page.waitForSelector('#view a.photo:has-text("Road to 5KM")'); check((await page.locator('#view .card .huge-num').first().innerText()) === '2.5', 'data kept after reload');
+  await page.waitForSelector('#view a.photo:has-text("Menuju 5KM")'); check((await page.locator('#view .card .huge-num').first().innerText()) === '2.5', 'data kept after reload');
   /* the RUN tab: a distance goal run, then a coached plan session */
   await page.click('[data-tab=run]'); await page.waitForSelector('.run-go'); await page.waitForTimeout(1500); await shot('run-start');
   await page.click('[data-mode=dist]'); check((await page.locator('#goal .num').innerText()) === '5', 'distance goal picker shows 5 km');
@@ -67,7 +68,7 @@ try {
     const { draw, trimRoute } = await import('/js/share.js');
     const route = []; for (let i = 0; i <= 240; i++) { const a = i / 240 * Math.PI * 2; route.push([6.1254 + 0.012 * Math.sin(a) + 0.003 * Math.sin(3 * a), 102.2386 + 0.016 * Math.cos(a)]); }
     const trimmed = trimRoute(route);
-    const d = { big: '5.02', unit: 'KM', title: 'Larian Pagi Sabtu', date: 'Sabtu, 24 Oktober 2026', stats: [['6:12', 'Pace'], ['31:07', 'Masa'], ['6/10', 'RPE']], photo: '/img/run-city.jpg' };
+    const d = { big: '5.02', unit: 'KM', title: 'Larian Pagi Sabtu', date: 'Sabtu, 24 Oktober 2026', stats: [['6:12', 'Pace'], ['31:07', 'Masa'], ['6/10', 'RPE']], photo: '/img/run-city.webp' };
     const a = await draw({ ...d, route: trimmed }, { style: 'route', format: 'story' }), b = await draw({ ...d, route: null }, { style: 'photo', format: 'post' });
     return { n: route.length, t: trimmed.length, a: a.toDataURL('image/jpeg', .85), b: b.toDataURL('image/jpeg', .85) };
   });
@@ -132,9 +133,11 @@ try {
   await page.click('[data-board]'); await page.click('[data-board-out]'); await page.waitForTimeout(400);
   await page.goto(`${ORIGIN}/#/leaderboard`); await page.waitForSelector('.lb-cta');
   check((await page.locator('.lb-row.me').count()) === 0, 'opting out removes me from the board at once');
+  libInPreview = supabaseLib;
   await page.click('.preview-bar button'); await page.waitForSelector('#auth-form'); check(true, 'exit preview returns to sign-in');
 } catch (e) { console.error(e.message); failed++; }
 check(supabaseCalls === 0, `no calls to Supabase in preview (${supabaseCalls})`);
+check(libInPreview === 0, `supabase-js never downloaded in preview mode (${libInPreview})`);
 check(errors.length === 0, 'no JavaScript errors ' + errors.join(' | '));
 await browser.close();
 console.log(failed ? `${failed} FAILED` : 'ALL PREVIEW CHECKS PASSED'); process.exit(failed ? 1 : 0);

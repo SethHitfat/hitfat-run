@@ -53,7 +53,7 @@ function start(view, session) {
       <div class="row"><button class="btn sm primary" data-restore>${esc(t('gps.continue'))}</button><button class="btn sm ghost" data-discard>${esc(t('gps.discard'))}</button></div></div>` : ''}
     <div class="seg" style="margin-top:16px" role="group">${modes.map(([k, l]) => `<button data-mode="${k}" aria-pressed="${prefs.mode === k}">${esc(l)}</button>`).join('')}</div>
     <div class="run-goal" id="goal"></div>
-    <button class="run-go" data-start ${supported ? '' : 'disabled'}>START</button>
+    <button class="run-go" data-start ${supported ? '' : 'disabled'}>${esc(t('run.start'))}</button>
     <div class="run-opts">
       <label class="row"><input type="checkbox" data-pref="voice" ${prefs.voice ? 'checked' : ''}><span>${esc(t('run.voice'))}</span></label>
       <label class="row"><input type="checkbox" data-pref="autoPause" ${prefs.autoPause ? 'checked' : ''}><span>${esc(t('run.autoPause'))}</span></label>
@@ -88,7 +88,7 @@ function start(view, session) {
   on(root, '[data-discard]', 'click', () => { Tracker.discard(); start(view, session); });
   on(root, '[data-restore]', 'click', () => { begin(view, null, saved); });
   on(root, '[data-start]', 'click', async () => {
-    if (saved && !await confirmSheet(t('gps.replaceQ'), t('gps.replace'), 'START', true)) return;
+    if (saved && !await confirmSheet(t('gps.replaceQ'), t('gps.replace'), t('run.start'), true)) return;
     begin(view, session);
   });
 

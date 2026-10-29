@@ -9,7 +9,7 @@ export function render(view) {
       <div class="row between"><div class="wordmark" style="color:#fff">HITFAT <b>RUN</b> CLUB</div>
         <div class="seg" style="width:120px;background:rgba(0,0,0,.45)" role="group" aria-label="${esc(t('settings.language'))}">
           <button data-lang="ms" aria-pressed="${lang() === 'ms'}">BM</button><button data-lang="en" aria-pressed="${lang() === 'en'}">EN</button></div></div>
-      <div><p class="tag">Run together.<br><b>Train smarter.</b></p>
+      <div><p class="tag">${esc(t('auth.tag1'))}<br><b>${esc(t('auth.tag2'))}</b></p>
         <p class="muted" style="font-size:16px;max-width:30em;margin:12px 0 0">${esc(t('auth.pitch'))}</p></div>
     </div>
     <div style="margin-top:24px">

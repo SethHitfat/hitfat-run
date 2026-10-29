@@ -1,15 +1,14 @@
 // The one data API the screens use. Normally it is Supabase (api-live.js);
 // in preview mode it is the browser-only stand-in (preview-api.js), so the
 // app can be tried before signing in. Preview never touches the database.
-import * as live from './api-live.js';
 
 export const PREVIEW = (() => { try { return localStorage.getItem('hfrun_preview') === '1'; } catch (e) { return false; } })();
-const impl = PREVIEW ? await import('./preview-api.js') : live;
+const impl = PREVIEW ? await import('./preview-api.js') : await import('./api-live.js');
 
 export function startPreview() { try { localStorage.setItem('hfrun_preview', '1'); } catch (e) {} location.replace('/#/home'); location.reload(); }
 export function endPreview() { try { localStorage.removeItem('hfrun_preview'); } catch (e) {} location.replace('/'); }
 
-export const { sb, isNetErr, authRedirect } = live;
+export const sb = impl.sb || null, isNetErr = impl.isNetErr, authRedirect = impl.authRedirect || (() => location.origin + '/');
 export const session = impl.session;
 const fwd = name => (...args) => impl[name](...args);
 export const clearCache = fwd('clearCache'), signInGoogle = fwd('signInGoogle'), signInEmail = fwd('signInEmail'),

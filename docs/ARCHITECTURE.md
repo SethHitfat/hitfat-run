@@ -96,7 +96,7 @@ Log run (from Home / Training / Profile) ─▶ manual form  |  LARI tab (GPS)
 
 ## 6. Phase 1 user journey (tested end-to-end)
 
-Sign up → onboarding → Road to 5KM recommended → calendar on chosen weekdays → open today's workout → mark complete and log the run (RPE, feeling) → progress updates → RSVP to a club run → *First Run* achievement.
+Sign up → onboarding → Menuju 5KM (Road to 5KM) recommended → calendar on chosen weekdays → open today's workout → mark complete and log the run (RPE, feeling) → progress updates → RSVP to a club run → *First Run* achievement.
 
 ## 7. Design system
 

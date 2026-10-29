@@ -1,20 +1,27 @@
 /* Shared by privacy.html and terms.html */
-:root{ --bg:#fff; --surface:#F4F4F4; --line:#E2E2E2; --text:#111; --muted:#5F5F5F; --red:#C40511; }
-@media (prefers-color-scheme: dark){ :root{ --bg:#0B0B0B; --surface:#161616; --line:#2A2A2A; --text:#fff; --muted:#A8A8A8; --red:#FF4D57; } }
+:root{ --bg:#fff; --surface:#F4F4F4; --line:#E2E2E2; --text:#111; --muted:#5F5F5F; --link:#7A6A00; --accent:#111; }
+@media (prefers-color-scheme: dark){ :root{ --bg:#000; --surface:#0E0E0E; --line:#262626; --text:#fff; --muted:#9A9A9A; --link:#FFE000; --accent:#FFE000; } }
 *{ box-sizing:border-box; margin:0; padding:0; }
 body{ background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; line-height:1.65; }
 .wrap{ max-width:720px; margin:0 auto; padding:32px 16px 80px; }
-.brand{ font-family:Oswald,"Arial Narrow",sans-serif; font-weight:700; font-size:20px; letter-spacing:.04em; display:block; margin-bottom:26px; color:var(--text); text-decoration:none; }
-.brand b{ color:#E30613; }
+.brand{ font-family:Oswald,"Arial Narrow",sans-serif; font-weight:700; font-size:20px; letter-spacing:.04em; display:block; color:var(--text); text-decoration:none; }
+.brand b{ background:#FFE000; color:#141000; padding:0 4px; border-radius:4px; }
 h1{ font-family:Oswald,"Arial Narrow",sans-serif; font-size:34px; text-transform:uppercase; line-height:1.05; margin-bottom:8px; }
 h2{ font-size:18px; font-weight:800; margin:30px 0 10px; }
 .upd{ color:var(--muted); font-size:13px; margin-bottom:26px; }
 p,li{ font-size:15px; margin-bottom:11px; }
 ul{ padding-left:20px; }
-a{ color:var(--red); }
+a{ color:var(--link); }
 .card{ background:var(--surface); border-radius:16px; padding:16px 18px; margin:16px 0; }
 .card p:last-child{ margin-bottom:0; }
 table{ width:100%; border-collapse:collapse; margin:12px 0; font-size:14px; }
 th,td{ text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
 th{ color:var(--muted); font-size:11px; letter-spacing:1px; text-transform:uppercase; }
 .foot{ margin-top:40px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+.top{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:26px; }
+.lang{ display:flex; background:var(--surface); border-radius:999px; padding:3px; }
+.lang button{ font:700 13px Inter,sans-serif; border:0; background:none; color:var(--muted); padding:7px 14px; border-radius:999px; cursor:pointer; }
+.lang button[aria-pressed="true"]{ background:#FFE000; color:#141000; }
+[hidden]{ display:none !important; }
+/* BM first even before legal.js runs; it switches html[lang] */
+section[lang="en"]{ display:none; } html[lang="en"] section[lang="en"]{ display:block; } html[lang="en"] section[lang="ms"]{ display:none; }

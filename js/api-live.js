@@ -3,6 +3,16 @@
 const SUPA_URL = 'https://auth.hitfat.io';                         // shared with HITFAT Hybrid
 const SUPA_KEY = 'sb_publishable_6tKH033Hb74EV7QlKBCFFA_5K_Lsxgv';  // publishable key, safe in the client
 
+const SUPA_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+
+// supabase-js is loaded here, not from index.html: the first screen paints
+// without waiting for it, and preview mode never downloads it at all.
+await new Promise(done => {
+  if (window.supabase) return done();
+  const s = document.createElement('script');
+  s.src = SUPA_LIB; s.async = true; s.onload = s.onerror = () => done();
+  document.head.appendChild(s);
+});
 export const sb = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
 export const session = { user: null };
 
