@@ -46,8 +46,9 @@
 
   <h2>Lokasi</h2>
   <p>Lokasi anda dibaca hanya semasa penjejak GPS dibuka dan merekod, dan hanya selepas browser meminta kebenaran anda.
-     Ia tidak pernah dikumpul di latar belakang dan tidak pernah ditunjukkan kepada orang lain.
-     Gambar kongsi dilukis dalam peranti anda; ia menyembunyikan 200 m pertama dan terakhir laluan secara lalai, dan tiada apa-apa
+     Ia tidak pernah dikumpul di latar belakang dan tidak pernah ditunjukkan kepada orang lain. Untuk kad cuaca, lokasi
+     anggaran (dibundarkan kira-kira 1 km) dihantar ke Open-Meteo untuk mendapatkan ramalan, hanya selepas anda pilih "Guna lokasi saya";
+     jika tidak, Kota Bharu digunakan. Gambar kongsi dilukis dalam peranti anda; ia menyembunyikan 200 m pertama dan terakhir laluan secara lalai, dan tiada apa-apa
      dimuat naik melainkan anda sendiri berkongsi.</p>
 
   <h2>Siapa memproses data anda</h2>
@@ -57,6 +58,7 @@
     <tr><td>Netlify</td><td>Mengehos app</td></tr>
     <tr><td>Google</td><td>Log masuk, hanya jika anda pilih "Teruskan dengan Google"</td></tr>
     <tr><td>OpenStreetMap</td><td>Jubin peta, hanya semasa peta dipaparkan</td></tr>
+    <tr><td>Open-Meteo</td><td>Ramalan cuaca (menerima lokasi anggaran sahaja, tanpa akaun anda)</td></tr>
     <tr><td>Vimeo</td><td>Video senaman, hanya semasa anda membuka sesi kekuatan</td></tr>
   </table>
 
@@ -118,8 +120,9 @@
 
   <h2>Location</h2>
   <p>Your location is read only while the GPS tracker is open and recording, and only after your browser asks your
-     permission. It is never collected in the background and never shown to other people.
-     Share images are drawn on your device; they hide the first and last 200 m of a route by default, and nothing is
+     permission. It is never collected in the background and never shown to other people. For the weather card, an
+     approximate location (rounded to about 1 km) is sent to Open-Meteo for a forecast, only after you choose "Use my location";
+     otherwise Kota Bharu is used. Share images are drawn on your device; they hide the first and last 200 m of a route by default, and nothing is
      uploaded unless you share it yourself.</p>
 
   <h2>Who processes your data</h2>
@@ -129,6 +132,7 @@
     <tr><td>Netlify</td><td>Hosting the app</td></tr>
     <tr><td>Google</td><td>Sign-in, only if you choose "Continue with Google"</td></tr>
     <tr><td>OpenStreetMap</td><td>Map tiles, only when a map is shown</td></tr>
+    <tr><td>Open-Meteo</td><td>Weather forecast (receives an approximate location only, never your account)</td></tr>
     <tr><td>Vimeo</td><td>Workout videos, only while you open a strength session</td></tr>
   </table>
 

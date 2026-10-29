@@ -21,6 +21,7 @@ const families = {
   'src.': ['manual', 'gps', 'strava'], 'status.': ['planned', 'completed', 'skipped', 'missed', 'draft', 'review', 'published', 'archived'],
   'tab.': ['home', 'training', 'run', 'club', 'profile'],
   'run.segName.': ['warm', 'cool', 'run', 'walk'], 'voice.seg.': ['warm', 'cool', 'run', 'walk'],
+  'wx.level.': ['safe', 'caution', 'danger'], 'wx.tip.': ['safe', 'caution', 'danger'],
   'st.focus.': ['all', 'legs', 'core', 'injury', 'drills', 'power'], 'theme.': ['system', 'light', 'dark'], 'tip.': ['pain', 'hard', 'easy'],
 };
 for (const [p, vals] of Object.entries(families)) vals.forEach(v => used.add(p + v));

@@ -423,3 +423,14 @@ main{ padding-bottom:calc(110px + var(--safe-b)); }
 .ch-progress{ border-color:var(--accent); }
 .ch-medal{ display:flex; align-items:center; gap:16px; margin:-4px 0 16px; }
 .medal{ flex:none; filter:drop-shadow(0 10px 24px rgba(255,224,0,.35)); animation:pop .6s var(--ease) both; }
+
+/* running weather */
+.wx{ --lv:#22C55E; border-color:color-mix(in srgb, var(--lv) 45%, var(--line)); }
+.wx-caution{ --lv:#FFE000; } .wx-danger{ --lv:#FF4D4D; }
+.wx-chip{ white-space:nowrap; flex:none; background:var(--lv); color:#0b0b0b; font-weight:800; font-size:12px; padding:5px 12px; border-radius:999px; letter-spacing:.04em; text-transform:uppercase; }
+.wx .huge-num{ color:var(--lv); }
+:root[data-theme="light"] .wx-caution .huge-num{ color:#7A6A00; }
+.wx-facts{ display:grid; grid-template-columns:auto auto; gap:2px 14px; color:var(--muted); padding-bottom:6px; } .wx-facts b{ color:var(--text); }
+.wx-best{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; margin-top:12px; padding:10px 12px; border-radius:12px; background:var(--surface-2); }
+.wx-best .eyebrow{ width:100%; }
+.wx-best b{ font-size:18px; }

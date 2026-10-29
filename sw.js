@@ -11,9 +11,9 @@ const VERSION = 'hfrun-v9', IMAGES = 'hfrun-img-v1';
 // cached the first time it is shown (IMAGES), so installing stays small.
 // Preview mode's files are left out: preview is a try-out, not an offline mode.
 const SHELL = ['/', '/index.html', '/app.css', '/manifest.json',
-  '/js/main.js', '/js/api.js', '/js/api-live.js', '/js/i18n.js', '/js/ui.js', '/js/stats.js', '/js/achievements.js', '/js/gps.js', '/js/voice.js', '/js/strength.js', '/js/share.js',
+  '/js/main.js', '/js/api.js', '/js/api-live.js', '/js/i18n.js', '/js/ui.js', '/js/stats.js', '/js/achievements.js', '/js/gps.js', '/js/voice.js', '/js/strength.js', '/js/share.js', '/js/weather.js',
   '/js/views/auth.js', '/js/views/onboarding.js', '/js/views/home.js', '/js/views/training.js', '/js/views/programs.js',
-  '/js/views/workout.js', '/js/views/log.js', '/js/views/club.js', '/js/views/profile.js', '/js/views/run.js', '/js/views/strength.js', '/js/views/board.js',
+  '/js/views/workout.js', '/js/views/log.js', '/js/views/club.js', '/js/views/profile.js', '/js/views/run.js', '/js/views/strength.js', '/js/views/board.js', '/js/views/weather-card.js',
   '/icon-192.png', '/favicon-32.png', '/img/club-kelantan.webp'];
 const PINNED = /^https:\/\/(cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2\.45\.4|cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4|fonts\.(googleapis|gstatic)\.com)\//;
 

@@ -14,6 +14,14 @@ await ctx.route('https://auth.hitfat.io/**', r => { supabaseCalls++; r.abort(); 
 await ctx.route(`${ORIGIN}/**`, r => { let p = new URL(r.request().url()).pathname; if (p.endsWith('/')) p += 'index.html';
   const f = join(ROOT, p); return existsSync(f) ? r.fulfill({ status: 200, contentType: TYPES[extname(f)] || 'application/octet-stream', body: readFileSync(f) }) : r.fulfill({ status: 404 }); });
 await ctx.route('https://player.vimeo.com/**', r => r.fulfill({ status: 200, contentType: 'text/html', body: '<html><body style="background:#222"></body></html>' }));
+// a fixed Open-Meteo forecast: 31 °C / 70% now (caution), coolest at 05:00 tomorrow-or-today
+let wxCalls = 0;
+await ctx.route('https://api.open-meteo.com/**', r => { wxCalls++;
+  const d = new Date(), pad = n => String(n).padStart(2, '0'), ymd = x => `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
+  const time = [], feels = []; for (let k = 0; k < 2; k++) { const x = new Date(d); x.setDate(x.getDate() + k);
+    for (let h = 0; h < 24; h++) { time.push(`${ymd(x)}T${pad(h)}:00`); feels.push(h === 21 ? 20 : 27 + 9 * Math.sin(Math.PI * Math.max(0, h - 5) / 17)); } }
+  r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ current: { temperature_2m: 31, relative_humidity_2m: 70, apparent_temperature: 37.4, uv_index: 9 },
+    hourly: { time, apparent_temperature: feels, temperature_2m: feels.map(f => f - 3), relative_humidity_2m: feels.map(() => 75), uv_index: feels.map(() => 2) } }) }); });
 // a fake GPS that runs north at ~6.6 m/s, one fix a second
 await ctx.addInitScript(() => {
   let lat = 6.1254, n = 0; const subs = new Map();
@@ -44,7 +52,7 @@ try {
   await page.click('[data-tab=club]'); await page.click('text=Larian Pagi Sabtu (contoh)'); await page.click('[data-rsvp="1"]');
   await page.waitForSelector('text=Anda berdaftar'); check(true, 'RSVP to the example run');
   await page.reload(); await page.waitForSelector('.preview-bar'); await page.click('[data-tab=home]');
-  await page.waitForSelector('#view a.photo:has-text("Menuju 5KM")'); check((await page.locator('#view .card .huge-num').first().innerText()) === '2.5', 'data kept after reload');
+  await page.waitForSelector('#view a.photo:has-text("Menuju 5KM")'); check((await page.locator('#view .card:not(.wx) .huge-num').first().innerText()) === '2.5', 'data kept after reload');
   /* the RUN tab: a distance goal run, then a coached plan session */
   await page.click('[data-tab=run]'); await page.waitForSelector('.run-go'); await page.waitForTimeout(1500); await shot('run-start');
   await page.click('[data-mode=dist]'); check((await page.locator('#goal .num').innerText()) === '5', 'distance goal picker shows 5 km');
@@ -110,6 +118,15 @@ try {
   check(/^1/.test(await page.locator('.ring .num').innerText()), 'library ring shows 1 session this week');
   await page.click('[data-tab=home]'); await page.waitForSelector('text=1/2 minggu ini'); check(true, 'home shows 1/2 strength sessions this week');
   await shot('str-home');
+  /* running weather on Home */
+  await page.waitForSelector('.wx'); await page.evaluate(() => window.scrollTo(0, 0)); await shot('weather');
+  check(/Berhati-hati/i.test(await page.locator('.wx-chip').innerText()), 'weather card: 31 °C 70% shows Berhati-hati');
+  check(/Waktu terbaik/.test(await page.locator('.wx').innerText()) && !/^(21[:.]00|0?9[:.]00 PTG|0?9[:.]00 PM)/i.test(await page.locator('.wx-best b').innerText()), 'best hour shown, never a window starting at 21:00');
+  const calls = wxCalls; await page.click('[data-tab=club]'); await page.click('[data-tab=home]'); await page.waitForSelector('.wx');
+  check(wxCalls === calls, 'weather cached: no second request within 30 minutes');
+  await page.evaluate(() => localStorage.removeItem('hfrun_wx')); await ctx.setOffline(true);
+  await page.click('[data-tab=club]'); await page.click('[data-tab=home]'); await page.waitForSelector('#h-body .card'); await page.waitForTimeout(500);
+  check((await page.locator('.wx').count()) === 0, 'offline with no fresh forecast: the card is hidden'); await ctx.setOffline(false);
   /* leaderboard (opt-in) and virtual challenges */
   await page.click('[data-tab=club]'); await page.waitForSelector('.ch-card');
   check((await page.locator('.hrail .ch-card').count()) === 2, 'two challenges in the Club tab'); await shot('club-challenges');

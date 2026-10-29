@@ -98,6 +98,7 @@ const check = (ok, what) => { console.log(`${ok ? '✓' : '✗'} ${what}`); if (
 async function newPage(opts = {}) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, serviceWorkers: 'block', locale: 'ms-MY', ...opts });
   await ctx.route(`${SUPA}/auth/v1/**`, authRoute); await ctx.route(`${SUPA}/rest/v1/**`, restRoute); await ctx.route(`${ORIGIN}/**`, siteRoute);
+  await ctx.route('https://api.open-meteo.com/**', r => r.abort());   // no live forecast in tests: the card simply stays hidden
   const page = await ctx.newPage(); page.setDefaultTimeout(12000);
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error' && !/favicon|Failed to load resource/.test(m.text())) errors.push('console: ' + m.text()); });
@@ -109,7 +110,7 @@ async function signIn(page, email, password) {
   await page.click('#auth-form [type=submit]');
 }
 const text = page => page.locator('#view').innerText();
-const weekKm = page => page.locator('#view .card .huge-num').first().innerText();   // the week's distance on Home
+const weekKm = page => page.locator('#view .card:not(.wx) .huge-num').first().innerText();   // the week's distance on Home
 
 try {
   /* 1. Head coach publishes the plans */

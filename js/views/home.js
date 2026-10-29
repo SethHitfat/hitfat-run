@@ -8,6 +8,7 @@ import { byCode } from '../achievements.js';
 import { sessionTitle, sessionMeta } from './training.js';
 import { card as strengthCard, suggestion, WEEK_TARGET } from './strength.js';
 import { challengeCard, myProgress, phase } from './board.js';
+import { weatherCard } from './weather-card.js';
 import { startOfWeek } from '../ui.js';
 
 export async function render(view) {
@@ -41,6 +42,7 @@ async function paint(body) {
   const goalLabel = plan ? L(plan.program.i18n).title : state.profile?.goal ? t('goal.' + state.profile.goal) : '';
 
   const root = mount(body, `
+    <div id="wx"></div>
     ${plan ? `<a class="photo tall" href="#/training" ${bg(photoFor({ plan: plan.program.slug, treadmill: state.profile?.training_location === 'treadmill' }))}><div class="in">
         <div class="row between"><div class="eyebrow">${esc(t('home.goal'))}</div>${pp.finished ? `<span class="chip ok">${esc(t('plan.finished'))}</span>` : ''}</div>
         <h2 style="margin:6px 0 2px;font-size:40px">${esc(goalLabel)}</h2>
@@ -93,6 +95,7 @@ async function paint(body) {
       <div class="grow"><div style="font-weight:700">Strava</div><div class="muted small">${esc(t('home.stravaSoon'))}</div></div>
       <span class="chip">${esc(t('home.notConnected'))}</span></div>`);
 
+  weatherCard(root.querySelector('#wx'));
   on(root, '[data-resched]', 'click', async (e, b) => {
     b.disabled = true;
     try { const n = await api.reschedule(today()); toast(t('plan.rescheduled', { n })); await paint(body); }
