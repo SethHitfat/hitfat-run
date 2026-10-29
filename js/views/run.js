@@ -8,12 +8,14 @@ import { esc, on, icon, km, dur, pace, toast, confirmSheet, today } from '../ui.
 import { Tracker, loadLeaflet, baseMap, ACC_MAX } from '../gps.js';
 import * as coach from '../voice.js';
 import { GPS_DRAFT } from './log.js';
+import { hydrationPlanner } from './hydration-card.js';
+import { keepPlan } from '../hydration.js';
 
 const PREFS = 'hfrun_runprefs';
 const prefs = (() => { try { return { mode: 'free', km: 5, min: 30, voice: true, autoPause: false, ...JSON.parse(localStorage.getItem(PREFS) || '{}') }; } catch (e) { return { mode: 'free', km: 5, min: 30, voice: true, autoPause: false }; } })();
 const savePrefs = () => { try { localStorage.setItem(PREFS, JSON.stringify(prefs)); } catch (e) {} };
 
-let tracker = null, tick = null, map = null, line = null, me = null, warm = null, preMap = null;
+let hydPlan = null, tracker = null, tick = null, map = null, line = null, me = null, warm = null, preMap = null;
 
 /* A plan session becomes a timeline the coach can call: 5 min brisk walk,
    the session's run/walk steps, 5 min walk to cool down. Distance sessions
@@ -53,6 +55,7 @@ function start(view, session) {
       <div class="row"><button class="btn sm primary" data-restore>${esc(t('gps.continue'))}</button><button class="btn sm ghost" data-discard>${esc(t('gps.discard'))}</button></div></div>` : ''}
     <div class="seg" style="margin-top:16px" role="group">${modes.map(([k, l]) => `<button data-mode="${k}" aria-pressed="${prefs.mode === k}">${esc(l)}</button>`).join('')}</div>
     <div class="run-goal" id="goal"></div>
+    <div id="hyd" style="margin:4px 0 18px"></div>
     <button class="run-go" data-start ${supported ? '' : 'disabled'}>${esc(t('run.start'))}</button>
     <div class="run-opts">
       <label class="row"><input type="checkbox" data-pref="voice" ${prefs.voice ? 'checked' : ''}><span>${esc(t('run.voice'))}</span></label>
@@ -76,13 +79,17 @@ function start(view, session) {
         <div class="muted small" style="margin-top:4px">${esc(timelineFor(tp) ? t('run.sessionCoach') : t('run.sessionDist', { km: (tp.distance_m / 1000).toFixed(1) }))}</div></div>`;
     } else g.innerHTML = `<div style="text-align:center"><div class="num" style="font-size:72px">0.00</div><div class="eyebrow">${esc(t('run.freeHelp'))}</div></div>`;
   };
-  paintGoal();
-  on(root, '[data-mode]', 'click', (e, b) => { prefs.mode = b.dataset.mode; savePrefs(); root.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b)); paintGoal(); });
+  // the hydration planner starts from how long this run is likely to take
+  const expected = () => prefs.mode === 'time' ? prefs.min : prefs.mode === 'dist' ? prefs.km * 7
+    : prefs.mode === 'session' && session ? (session.template.duration_min || (session.template.distance_m || 5000) / 1000 * 7) : 45;
+  const planner = () => hydrationPlanner(root.querySelector('#hyd'), { minutes: expected(), onPlan: p => { hydPlan = p; } });
+  paintGoal(); planner();
+  on(root, '[data-mode]', 'click', (e, b) => { prefs.mode = b.dataset.mode; savePrefs(); root.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b)); paintGoal(); planner(); });
   on(root, '[data-step]', 'click', (e, b) => {
     const d = +b.dataset.step;
     if (prefs.mode === 'dist') prefs.km = Math.min(100, Math.max(1, prefs.km + d * (prefs.km < 5 ? 0.5 : 1)));
     else prefs.min = Math.min(300, Math.max(5, prefs.min + d * (prefs.min < 30 ? 5 : 10)));
-    savePrefs(); paintGoal();
+    savePrefs(); paintGoal(); planner();
   });
   root.addEventListener('change', e => { const k = e.target.dataset.pref; if (k) { prefs[k] = e.target.checked; savePrefs(); } });
   on(root, '[data-discard]', 'click', () => { Tracker.discard(); start(view, session); });
@@ -128,6 +135,7 @@ function begin(view, session, restoreFrom) {
     : prefs.mode === 'session' && session && !tl && session.template.distance_m ? { type: 'dist', v: session.template.distance_m } : null;
   countdown(view, () => {
     tracker.begin(session && prefs.mode === 'session' ? session.id : null, { goal, timeline: tl, segDone: -1, title: session ? L(session.template.i18n).title : null });
+    if (hydPlan) keepPlan(tracker.s.id, hydPlan);
     coach.beep(1, true);
     coach.say(tl ? t('voice.sessionStart') : goal ? t(goal.type === 'dist' ? 'voice.startDist' : 'voice.startTime', { v: goal.type === 'dist' ? (goal.v / 1000).toFixed(1) : coach.spokenDuration(goal.v, t) }) : t('voice.start'));
     live(view);

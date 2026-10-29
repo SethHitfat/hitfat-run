@@ -434,3 +434,11 @@ main{ padding-bottom:calc(110px + var(--safe-b)); }
 .wx-best{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; margin-top:12px; padding:10px 12px; border-radius:12px; background:var(--surface-2); }
 .wx-best .eyebrow{ width:100%; }
 .wx-best b{ font-size:18px; }
+
+/* hydration */
+.hyd .hyd-mins{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; overflow:visible; }
+.hyd .pill{ padding:8px 0; font-size:13px; text-align:center; }
+.hyd-out{ margin-top:12px; padding:12px 14px; border-radius:14px; background:var(--surface-2); }
+.hyd-big{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.hyd-big .num{ font-size:40px; color:var(--accent-text); } .hyd-big .u{ font-weight:800; margin-left:4px; color:var(--muted); }
+.hyd-big .l{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-top:2px; }

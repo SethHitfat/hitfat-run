@@ -8,6 +8,7 @@ import { esc, on, mount, icon, uuid, km, dur, pace, paceOf, fmtDateLong, fmtTime
 import { feedbackFields, bindFeedback, afterComplete, RUN_CATS } from './workout.js';
 import { byCode } from '../achievements.js';
 import { photoFor, fmtDate } from '../ui.js';
+import { hydrationSummary } from './hydration-card.js';
 
 const TYPES = ['easy', 'recovery', 'long', 'tempo', 'threshold', 'interval', 'hill', 'run_walk', 'race', 'other'];
 export const GPS_DRAFT = 'hfrun_gps_draft';
@@ -144,6 +145,7 @@ export async function detail(view, id) {
         <div class="metric"><div class="num">${a.rpe ? a.rpe + '/10' : '–'}</div><div class="l">RPE</div></div>
         <div class="metric"><div class="num">${a.avg_hr || '–'}</div><div class="l">${esc(t('log.hrShort'))}</div></div>
       </div>
+      ${hydrationSummary(a)}
       ${a.splits_s && a.splits_s.length ? `<h2>${esc(t('act.splits'))}</h2><div class="card list">${a.splits_s.map((s, i) => `<div class="row between"><span class="num">${i + 1} km</span><span class="num">${pace(s)}</span></div>`).join('')}</div>` : ''}
       ${a.notes ? `<h2>${esc(t('log.notes'))}</h2><p style="margin:0">${esc(a.notes)}</p>` : ''}
       ${a.source === 'gps' ? `<p class="muted tiny" style="margin-top:16px">${esc(t('gps.accuracyNote'))}</p>` : ''}

@@ -57,6 +57,14 @@ try {
   await page.click('[data-tab=run]'); await page.waitForSelector('.run-go'); await page.waitForTimeout(1500); await shot('run-start');
   await page.click('[data-mode=dist]'); check((await page.locator('#goal .num').innerText()) === '5', 'distance goal picker shows 5 km');
   await page.click('[data-step="1"]'); check((await page.locator('#goal .num').innerText()) === '6', 'goal +1 km');
+  await page.waitForSelector('.hyd .hyd-big');
+  check((await page.locator('.hyd [data-min][aria-pressed=true]').innerText()) === '45 min', 'hydration: a 6 km goal preselects ~45 min');
+  await page.click('.hyd [data-min="90"]'); await shot('hydration');
+  const hydText = await page.locator('.hyd').innerText();
+  check(/Minum lebih kurang \d+ml air \+ \d stick HITFAT Hydrate\. Minum sikit-sikit setiap 15 minit\./.test(hydText), 'hydration: plain-language advice for 90 min in caution weather');
+  check(/Anggaran sahaja, bukan nasihat perubatan\./.test(hydText), 'hydration: disclaimer shown');
+  check(!/kejang|heatstroke|prestasi/i.test(hydText), 'hydration: none of the banned claims');
+  await page.click('.hyd [data-min="45"]');
   await page.click('.run-go'); await page.click('#cd'); await page.waitForSelector('#gl');
   await page.waitForTimeout(33000); await shot('run-live');
   const liveKm = parseFloat(await page.locator('#gl-km').innerText()); check(liveKm > 0.005, `live distance grows (${liveKm} km)`);
@@ -70,6 +78,9 @@ try {
   await page.waitForSelector('#view [data-share]'); await page.click('#view [data-share]');
   await page.waitForFunction(() => (document.querySelector('#sh-img')?.src || '').startsWith('data:image'));
   check(await page.locator('#sh-hide').isChecked(), 'share hides the start and end of the route by default');
+  await page.keyboard.press('Escape');
+  check(/Kad hidrasi/.test(await page.locator('#view').innerText()) && /Dirancang sebelum lari/.test(await page.locator('#view').innerText()), 'saved GPS run shows its hydration card with the plan made at the start');
+  await page.click('#view [data-share]'); await page.waitForFunction(() => (document.querySelector('#sh-img')?.src || '').startsWith('data:image'));
   await page.click('[data-format=post]'); await page.waitForTimeout(400); await shot('share-sheet');
   await page.keyboard.press('Escape');
   const cards = await page.evaluate(async () => {
