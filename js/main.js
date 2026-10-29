@@ -1,5 +1,6 @@
 // Boot, auth gate, hash router and the tab bar.
 import * as api from './api.js';
+import { setSweatOwner } from './hydration.js';
 import { t, setLang, lang } from './i18n.js';
 import { $, esc, icon, toast, closeSheet, errorBox } from './ui.js';
 
@@ -28,13 +29,14 @@ const ROUTES = [
   [/^leaderboard$/, () => import('./views/board.js')],
   [/^challenge\/new$/, () => import('./views/board.js'), 'create'],
   [/^challenge\/([\w-]+)$/, () => import('./views/board.js'), 'challenge'],
+  [/^sweat$/, () => import('./views/sweat.js')],
   [/^strength$/, () => import('./views/strength.js')],
   [/^strength\/([\w-]+)$/, () => import('./views/strength.js'), 'detail'],
   [/^strength\/([\w-]+)\/play$/, () => import('./views/strength.js'), 'play'],
 ];
 const TABS = [['home', 'home'], ['training', 'training'], ['run', 'run'], ['club', 'club'], ['profile', 'profile']];
 const TAB_OF = { home: 'home', training: 'training', programs: 'training', program: 'training', review: 'training', workout: 'training',
-  club: 'club', event: 'club', profile: 'profile', history: 'profile', settings: 'profile', activity: 'profile', log: 'home', run: 'run', gps: 'run', strength: 'training', leaderboard: 'club', challenge: 'club' };
+  club: 'club', event: 'club', profile: 'profile', history: 'profile', settings: 'profile', activity: 'profile', log: 'home', run: 'run', gps: 'run', strength: 'training', leaderboard: 'club', challenge: 'club', sweat: 'run' };
 
 export function go(path, replace) {
   const h = '#/' + path.replace(/^#?\/?/, '');
@@ -93,7 +95,7 @@ let signedInAs = null;
 async function onSession(sess) {
   const id = sess && sess.user ? sess.user.id : null;
   if (id === signedInAs && state.ready) return;
-  signedInAs = id; api.session.user = sess ? sess.user : null;
+  signedInAs = id; api.session.user = sess ? sess.user : null; setSweatOwner(id);
   if (id) {
     try { await loadRunner(); }
     catch (e) { console.error(e); state.ready = true; $('#view').innerHTML = errorBox(e, true); $('#view [data-retry]')?.addEventListener('click', () => location.reload()); return; }

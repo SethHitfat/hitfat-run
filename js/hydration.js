@@ -8,9 +8,29 @@ export const DRINK_SHARE = [0.6, 0.8]; // drink about 60–80 % of what is sweat
 export const SODIUM_MG_PER_L = 900;    // typical sweat sodium (a rough average)
 export const STICK_SODIUM_MG = 500;    // one HITFAT Hydrate stick
 
-const SWEAT = 'hfrun_sweat';
-/** Saved sweat tests, newest first (Phase 4 stores them on the device). */
-export function sweatTests() { try { return JSON.parse(localStorage.getItem(SWEAT) || '[]'); } catch (e) { return []; } }
+/* Sweat tests live on this device only, one list per signed-in runner, so a
+   shared phone never mixes two people's tests. */
+let owner = 'anon';
+export const setSweatOwner = id => { owner = id || 'anon'; };
+const SWEAT = () => 'hfrun_sweat_' + owner, DRAFT = () => 'hfrun_sweat_draft_' + owner;
+/** Saved sweat tests, newest first. */
+export function sweatTests() { try { return JSON.parse(localStorage.getItem(SWEAT()) || '[]'); } catch (e) { return []; } }
+export function saveSweatTest(test) { const all = [test, ...sweatTests().filter(x => x.id !== test.id)].slice(0, 30); try { localStorage.setItem(SWEAT(), JSON.stringify(all)); } catch (e) {} return all; }
+export function deleteSweatTest(id) { try { localStorage.setItem(SWEAT(), JSON.stringify(sweatTests().filter(x => x.id !== id))); } catch (e) {} }
+export const sweatDraft = () => { try { return JSON.parse(localStorage.getItem(DRAFT()) || 'null'); } catch (e) { return null; } };
+export const setSweatDraft = d => { try { d ? localStorage.setItem(DRAFT(), JSON.stringify(d)) : localStorage.removeItem(DRAFT()); } catch (e) {} };
+/** "Delete my data": the device-only hydration data goes too. */
+export function clearHydrationData() { try { localStorage.removeItem(SWEAT()); localStorage.removeItem(DRAFT()); localStorage.removeItem(KEPT); } catch (e) {} }
+
+/**
+ * Sweat rate in L/h = ((weight before − weight after) kg + fluid drunk L) ÷ hours.
+ * Returns null when the numbers cannot be right (a rate outside 0.1–4 L/h).
+ */
+export function sweatRate({ before, after, drunkMl, minutes }) {
+  if (!(before > 0 && after > 0 && minutes > 0) || drunkMl < 0) return null;
+  const r = ((before - after) + drunkMl / 1000) / (minutes / 60);
+  return r >= 0.1 && r <= 4 ? Math.round(r * 100) / 100 : null;
+}
 /** Average sweat rate of the last three tests, or null. */
 export function measuredRate(tests = sweatTests()) {
   const last = tests.slice(0, 3).map(x => x.rate).filter(r => r > 0);

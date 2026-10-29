@@ -22,6 +22,7 @@ const families = {
   'tab.': ['home', 'training', 'run', 'club', 'profile'],
   'run.segName.': ['warm', 'cool', 'run', 'walk'], 'voice.seg.': ['warm', 'cool', 'run', 'walk'],
   'wx.level.': ['safe', 'caution', 'danger'], 'wx.tip.': ['safe', 'caution', 'danger'],
+  'sw.step': ['1', '2', '3'],
   'st.focus.': ['all', 'legs', 'core', 'injury', 'drills', 'power'], 'theme.': ['system', 'light', 'dark'], 'tip.': ['pain', 'hard', 'easy'],
 };
 for (const [p, vals] of Object.entries(families)) vals.forEach(v => used.add(p + v));

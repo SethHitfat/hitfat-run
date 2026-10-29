@@ -34,6 +34,7 @@ export async function hydrationPlanner(old, { minutes, onPlan }) {
         <p style="margin:10px 0 0;font-weight:600">${esc(advice(p))}</p>
         <div class="muted tiny" style="margin-top:6px">${esc(t(p.measured ? 'hyd.basisTest' : 'hyd.basis', { r: p.rate.toFixed(1), mg: p.sodium, lo: p.waterLow, hi: p.waterHigh }))}</div>
       </div>
+      <a class="link small" href="#/sweat" style="display:inline-block;margin-top:10px;font-weight:700">${esc(measured ? t('hyd.retest') : t('hyd.test'))}</a>
       <div class="muted tiny" style="margin-top:8px">${esc(t('hyd.disclaimer'))}</div></div>`;
   };
   paint();

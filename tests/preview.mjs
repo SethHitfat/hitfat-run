@@ -138,6 +138,18 @@ try {
   await page.evaluate(() => localStorage.removeItem('hfrun_wx')); await ctx.setOffline(true);
   await page.click('[data-tab=club]'); await page.click('[data-tab=home]'); await page.waitForSelector('#h-body .card'); await page.waitForTimeout(500);
   check((await page.locator('.wx').count()) === 0, 'offline with no fresh forecast: the card is hidden'); await ctx.setOffline(false);
+  /* guided sweat test, then the planner uses it */
+  await page.goto(`${ORIGIN}/#/sweat`); await page.waitForSelector('#sw-before');
+  await page.fill('#sw-before', '70,4'); await page.click('#sw1 [type=submit]'); await page.waitForSelector('#sw-after');
+  check(/70.4 kg/.test(await page.locator('#view').innerText()), 'sweat test: weight before kept (comma accepted)');
+  await page.fill('#sw-after', '69.6'); await page.fill('#sw-drunk', '300'); await page.fill('#sw-min', '50'); await page.click('#sw3 [type=submit]');
+  await page.waitForSelector('.sw-result'); await shot('sweat-result');
+  check(/1\.32/.test(await page.locator('.sw-result').innerText()), 'sweat rate 1.32 L/h from (0.8 kg + 0.3 L) in 50 min');
+  await page.click('[data-tab=run]'); await page.waitForSelector('.hyd .hyd-big');
+  check(/Ikut ujian peluh anda: kadar peluh 1\.3 L\/jam/.test(await page.locator('.hyd').innerText()), 'planner now uses the measured sweat rate');
+  await page.click('[data-tab=profile]'); await page.waitForSelector('#pr-body a[href="#/sweat"]');
+  const prSweat = await page.locator('#pr-body a[href="#/sweat"]').innerText(); check(/1\.32 L\/jam/.test(prSweat), 'profile shows the sweat-test average: ' + JSON.stringify(prSweat));
+
   /* leaderboard (opt-in) and virtual challenges */
   await page.click('[data-tab=club]'); await page.waitForSelector('.ch-card');
   check((await page.locator('.hrail .ch-card').count()) === 2, 'two challenges in the Club tab'); await shot('club-challenges');

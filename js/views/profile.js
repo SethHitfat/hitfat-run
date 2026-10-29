@@ -6,6 +6,7 @@ import { esc, on, mount, icon, km, dur, durWords, pace, paceOf, fmtDate, fmtTime
   openSheet, closeSheet, friendlyError, startOfMonth } from '../ui.js';
 import { totals, thisWeek, thisMonth, weeklySeries, consistency, bests, PB_DIST } from '../stats.js';
 import { ACHIEVEMENTS } from '../achievements.js';
+import { measuredRate, sweatTests, clearHydrationData } from '../hydration.js';
 
 const backBtn = `<button class="icon-btn" data-back aria-label="${esc(t('common.back'))}">${icon('back')}</button>`;
 
@@ -44,6 +45,11 @@ export async function render(view) {
           <div class="num" style="font-size:26px;margin-top:6px">${pb.longest ? km(pb.longest.distance_m) + ' km' : '–'}</div>
           <div class="muted tiny" style="margin-top:4px">${pb.longest ? esc(fmtDate(pb.longest.started_at)) : esc(t('prof.notYet'))}</div>${pb.longest ? '</a>' : ''}</div></div>
       <p class="muted tiny" style="margin:8px 0 0">${esc(t('prof.bestsNote'))}</p>
+
+      <h2>${esc(t('sw.title'))}</h2>
+      <a class="card tap row between" href="#/sweat" style="display:flex;text-decoration:none">
+        <div><div class="eyebrow">${esc(measuredRate() ? t('sw.avg', { n: Math.min(3, sweatTests().length) }) : t('sw.none'))}</div>
+          <div style="font-weight:800;font-size:20px;margin-top:4px">${measuredRate() ? `${measuredRate().toFixed(2)} ${esc(t('sw.lph'))}` : esc(t('sw.startShort'))}</div></div>${icon('chevron')}</a>
 
       <h2 class="row between"><span>${esc(t('prof.recent'))}</span>${acts.length ? `<a class="link small" style="font-family:var(--font);text-transform:none" href="#/history">${esc(t('prof.all'))}</a>` : ''}</h2>
       ${acts.length ? `<div class="card list">${acts.slice(0, 5).map(activityRow).join('')}</div>` : `<div class="card">${emptyState(t('prof.noActsT'), t('prof.noActs'), `<a class="btn primary sm" href="#/log">${esc(t('log.title'))}</a>`)}</div>`}
@@ -133,7 +139,7 @@ export async function settings(view) {
   on(root, '[data-board]', 'click', async () => (await import('./board.js')).optInSheet(() => settings(view)));
   on(root, '[data-delete]', 'click', async () => {
     if (!await confirmSheet(t('settings.deleteQ'), t('settings.deleteConfirm'), t('settings.deleteGo'), true)) return;
-    try { await api.deleteMyRunData(); await loadRunner(); toast(t('settings.deleted')); go('onboarding', true); } catch (x) { toast(friendlyError(x)); }
+    try { await api.deleteMyRunData(); clearHydrationData(); await loadRunner(); toast(t('settings.deleted')); go('onboarding', true); } catch (x) { toast(friendlyError(x)); }
   });
   on(root, '[data-out]', 'click', async () => {
     if (api.PREVIEW) return api.endPreview();

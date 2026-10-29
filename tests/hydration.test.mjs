@@ -1,6 +1,6 @@
 // Hydration planner rules.   node tests/hydration.test.mjs
 globalThis.localStorage = { _: {}, getItem(k) { return this._[k] ?? null; }, setItem(k, v) { this._[k] = String(v); }, removeItem(k) { delete this._[k]; } };
-const { planHydration, measuredRate } = await import('../js/hydration.js');
+const { planHydration, measuredRate, sweatRate, saveSweatTest, sweatTests, setSweatOwner, clearHydrationData } = await import('../js/hydration.js');
 let bad = 0; const ok = (c, m) => { console.log(`${c ? '✓' : '✗'} ${m}`); if (!c) bad++; };
 const p = (minutes, level, measured) => planHydration({ minutes, level, measured });
 let x = p(60, 0);
@@ -17,5 +17,11 @@ x = p(45, 0); ok(x.sticks === 1, `45 min safe counts as long enough for a stick 
 x = p(60, null); ok(x.level === 0 && x.rate === 0.8, 'unknown weather is treated as safe');
 ok(measuredRate([{ rate: 1.0 }, { rate: 1.2 }, { rate: 1.4 }, { rate: 3 }]) === 1.2, 'measured rate: average of the last three tests only');
 ok(measuredRate([]) === null, 'no tests: no measured rate');
+ok(sweatRate({ before: 70.4, after: 69.6, drunkMl: 300, minutes: 50 }) === 1.32, `sweat rate ((70.4 − 69.6) + 0.3) ÷ 50/60 = 1.32 L/h [${sweatRate({ before: 70.4, after: 69.6, drunkMl: 300, minutes: 50 })}]`);
+ok(sweatRate({ before: 70, after: 71, drunkMl: 0, minutes: 60 }) === null, 'heavier after and nothing drunk: refused');
+ok(sweatRate({ before: 70, after: 64, drunkMl: 0, minutes: 60 }) === null, '6 L/h: refused as impossible');
+setSweatOwner('a'); saveSweatTest({ id: '1', rate: 1.1 }); setSweatOwner('b');
+ok(sweatTests().length === 0, 'tests are per runner: B sees none of A\'s');
+setSweatOwner('a'); ok(sweatTests().length === 1, 'A still has hers'); clearHydrationData(); ok(sweatTests().length === 0, 'delete my data clears them');
 if (bad) { console.error(`${bad} hydration problems`); process.exit(1); }
 console.log('hydration ok');
