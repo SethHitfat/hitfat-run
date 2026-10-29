@@ -236,5 +236,6 @@ export async function challengeBoard(id) {
   if (db.profile?.board_opt_in_at && (db.entries || []).some(x => x.challenge_id === id)) rows.push({ name: db.profile.board_name, km: +(m / 1000).toFixed(1), me: true });
   return board(rows).map(x => ({ ...x, done: x.km * 1000 >= c.target_m }));
 }
+export async function myPoints() { return null; }   // no ledger in preview: Profile shows the estimate
 export async function createChallenge() { fail('Tidak tersedia dalam pratonton'); }
 export async function archiveChallenge() { fail('Tidak tersedia dalam pratonton'); }

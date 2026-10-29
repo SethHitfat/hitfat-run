@@ -171,3 +171,20 @@ returns numbers, never names. Only HITFAT GPS and manual runs count; Strava neve
 Opting out takes effect at once. Coaches (head/running) and super admins publish challenges; members join while
 a challenge is open. Finishers get a medal on the challenge page and a share card.
 Statements containing DELETE are kept in `db/PASTE_IN_SUPABASE.sql` for a human to run in the SQL editor.
+
+## Fasa 1–6 (Oktober 2026)
+
+- **BM first**: plan names and session text in Bahasa Malaysia (`db/005_plan_text_bm.sql` updates production text only);
+  Privacy and Terms in BM with an EN toggle (`legal.js`).
+- **Lighter first load**: WebP photos under 80 KB; the service worker precaches the shell and the sign-in photo only,
+  other photos are cached when first shown (`hfrun-img-*`); supabase-js is loaded by `api-live.js`, never in preview.
+- **Weather** (`js/weather.js`): Open-Meteo, NOAA heat index → Selamat / Berhati-hati / Bahaya, coolest hour 05:00–21:00,
+  30-minute cache, location only after "Guna lokasi saya", rounded to ~1 km.
+- **Hydration** (`js/hydration.js`): planner on the RUN screen and a card on saved runs; sweat tests (`#/sweat`) are kept on
+  the device per runner; the planner uses the average of the last three.
+- **Draft plans**: Menuju HYROX and Menuju 21KM (`db/seed/programs-draft.mjs` → `db/006_draft_plans_hyrox_21k.sql`),
+  status `draft`, every session marked "DRAF — perlu semakan coach"; strength sessions reference the video sessions via `steps`.
+- **Mata HITFAT** (skeleton): rules in `js/points.js` and the proposed ledger in `db/007_points_proposal.sql`.
+  Profile shows the balance read-only, as an estimate until the ledger is approved. No redeeming, no inter-state contest yet.
+
+Not applied to production, waiting for review: `005`, `006`, `007`.

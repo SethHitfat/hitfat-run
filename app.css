@@ -450,3 +450,8 @@ main{ padding-bottom:calc(110px + var(--safe-b)); }
 .sw-steps .now b{ background:var(--accent); color:var(--accent-ink); } .sw-steps .now{ color:var(--text); }
 .sw-steps .done b{ background:var(--ok-soft); color:var(--ok); }
 .sw-result{ border-color:var(--accent); }
+
+/* Mata HITFAT (read-only) */
+.pts-rules{ display:grid; gap:6px; margin-top:10px; }
+.pts-rules div{ display:flex; justify-content:space-between; gap:12px; font-size:13px; color:var(--muted); }
+.pts-rules b{ color:var(--text); font-family:var(--display); font-size:16px; }

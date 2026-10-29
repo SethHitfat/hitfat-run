@@ -209,6 +209,17 @@ export async function challengeBoard(id) { return must(await sb.rpc('run_challen
 export async function createChallenge(c) { return must(await sb.from('run_challenges').insert({ ...c, created_by: uid() }).select().single()); }
 export async function archiveChallenge(id) { must(await sb.from('run_challenges').update({ status: 'archived' }).eq('id', id)); }
 
+/* ───────── Mata HITFAT (read-only) ─────────
+   The ledger is a proposal (db/007_points_proposal.sql) until approved:
+   while run_my_points() does not exist this returns null and Profile shows
+   an estimate instead. */
+export async function myPoints() {
+  const { data, error } = await sb.rpc('run_my_points');
+  if (error) { if (error.code === 'PGRST202' || error.code === '42883' || /could not find|does not exist/i.test(error.message || '')) return null; throw error; }
+  const rows = data || [];
+  return { total: rows[0]?.total || 0, by: Object.fromEntries(rows.map(r => [r.rule_code, r.points])) };
+}
+
 /* ───────── achievements ───────── */
 export async function evaluateAchievements() {
   try { return (must(await sb.rpc('run_evaluate_achievements')) || []).map(r => typeof r === 'string' ? r : r.run_evaluate_achievements); }

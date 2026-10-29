@@ -149,6 +149,10 @@ try {
   check(/Ikut ujian peluh anda: kadar peluh 1\.3 L\/jam/.test(await page.locator('.hyd').innerText()), 'planner now uses the measured sweat rate');
   await page.click('[data-tab=profile]'); await page.waitForSelector('#pr-body a[href="#/sweat"]');
   const prSweat = await page.locator('#pr-body a[href="#/sweat"]').innerText(); check(/1\.32 L\/jam/.test(prSweat), 'profile shows the sweat-test average: ' + JSON.stringify(prSweat));
+  await page.waitForSelector('.pts'); await page.locator('.pts').scrollIntoViewIfNeeded(); await shot('points');
+  const pv = await page.locator('.pts').innerText();
+  check(/Anggaran/.test(pv) && /Tebusan hadiah belum tersedia/.test(pv), 'Mata HITFAT: read-only estimate, no redeeming');
+  check(/Ujian peluh \(20, setiap 14 hari\)\s*20/.test(pv), 'the sweat test earned its 20 points: ' + JSON.stringify(pv.slice(0, 300)));
 
   /* leaderboard (opt-in) and virtual challenges */
   await page.click('[data-tab=club]'); await page.waitForSelector('.ch-card');

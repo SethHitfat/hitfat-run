@@ -250,6 +250,10 @@ try {
   check(lb.counts['60000000-0000-0000-0000-000000000001'] === 1 && lb.board.length === 1 && lb.board[0].done, 'challenge joined once (double tap safe), board marks her finished');
   await page.evaluate(() => { location.hash = '#/challenge/60000000-0000-0000-0000-000000000001'; }); await page.waitForSelector('.ch-medal');
   check(true, 'finisher medal shown on the challenge page');
+  // Mata HITFAT: the ledger is not live (007 is a proposal), so Profile shows an estimate, without errors
+  await page.click('[data-tab=profile]'); await page.waitForSelector('.pts');
+  const ptsText = await page.locator('.pts').innerText();
+  check(/Anggaran/.test(ptsText) && /\d+\s*mata/.test(ptsText), 'profile: Mata HITFAT shown read-only as an estimate while the ledger is not live');
 
   // English, dark theme, desktop
   await page.evaluate(() => { location.hash = '#/settings'; }); await page.waitForSelector('[data-lang=en]');

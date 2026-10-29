@@ -7,6 +7,7 @@ import { esc, on, mount, icon, km, dur, durWords, pace, paceOf, fmtDate, fmtTime
 import { totals, thisWeek, thisMonth, weeklySeries, consistency, bests, PB_DIST } from '../stats.js';
 import { ACHIEVEMENTS } from '../achievements.js';
 import { measuredRate, sweatTests, clearHydrationData } from '../hydration.js';
+import { pointsCard } from './points-card.js';
 
 const backBtn = `<button class="icon-btn" data-back aria-label="${esc(t('common.back'))}">${icon('back')}</button>`;
 
@@ -22,7 +23,7 @@ export async function render(view) {
     const [acts, earned] = await Promise.all([api.listActivities({ limit: 1000 }), api.listAchievements()]);
     const all = totals(acts), wk = thisWeek(acts), mo = thisMonth(acts), cons = consistency(acts, 4), pb = bests(acts), series = weeklySeries(acts, 8);
     const got = Object.fromEntries(earned.map(e => [e.code, e.earned_at]));
-    mount(body, `
+    const root = mount(body, `
       <div style="margin:4px 0 8px"><div class="huge-num">${km(all.dist, 1)}</div><div class="eyebrow" style="margin-top:6px">${esc(t('prof.totalKm'))}</div></div>
       <h2 style="margin-top:22px">${esc(t('prof.progress'))}</h2>
       <div class="card">
@@ -46,6 +47,9 @@ export async function render(view) {
           <div class="muted tiny" style="margin-top:4px">${pb.longest ? esc(fmtDate(pb.longest.started_at)) : esc(t('prof.notYet'))}</div>${pb.longest ? '</a>' : ''}</div></div>
       <p class="muted tiny" style="margin:8px 0 0">${esc(t('prof.bestsNote'))}</p>
 
+      <h2>${esc(t('pts.title'))}</h2>
+      <div id="pts"><div class="skel" style="height:150px"></div></div>
+
       <h2>${esc(t('sw.title'))}</h2>
       <a class="card tap row between" href="#/sweat" style="display:flex;text-decoration:none">
         <div><div class="eyebrow">${esc(measuredRate() ? t('sw.avg', { n: Math.min(3, sweatTests().length) }) : t('sw.none'))}</div>
@@ -57,6 +61,7 @@ export async function render(view) {
       <h2>${esc(t('prof.badges'))} <span class="muted small" style="font-family:var(--font)">${earned.length}/${ACHIEVEMENTS.length}</span></h2>
       <div class="badges">${ACHIEVEMENTS.map(a => `<div class="badge ${got[a.code] ? 'got' : ''}"><div class="ic">${icon(a.icon)}</div>
         <div class="n">${esc(a[lang()][0])}</div><div class="d">${got[a.code] ? esc(fmtDate(got[a.code])) : esc(a[lang()][1])}</div></div>`).join('')}</div>`);
+    pointsCard(root.querySelector('#pts'));
   } catch (e) { console.error(e); body.innerHTML = errorBox(e, true); body.querySelector('[data-retry]').onclick = () => render(view); }
 }
 

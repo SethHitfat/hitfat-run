@@ -26,4 +26,5 @@ export const clearCache = fwd('clearCache'), signInGoogle = fwd('signInGoogle'),
   saveStrength = fwd('saveStrength'), listStrength = fwd('listStrength'),
   leaderboard = fwd('leaderboard'), setBoard = fwd('setBoard'), listChallenges = fwd('listChallenges'), getChallenge = fwd('getChallenge'),
   challengeCounts = fwd('challengeCounts'), myChallenges = fwd('myChallenges'), joinChallenge = fwd('joinChallenge'), leaveChallenge = fwd('leaveChallenge'),
-  challengeBoard = fwd('challengeBoard'), createChallenge = fwd('createChallenge'), archiveChallenge = fwd('archiveChallenge');
+  challengeBoard = fwd('challengeBoard'), createChallenge = fwd('createChallenge'), archiveChallenge = fwd('archiveChallenge'),
+  myPoints = fwd('myPoints');
