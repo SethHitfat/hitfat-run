@@ -173,6 +173,18 @@ try {
   await page.click('[data-board]'); await page.click('[data-board-out]'); await page.waitForTimeout(400);
   await page.goto(`${ORIGIN}/#/leaderboard`); await page.waitForSelector('.lb-cta');
   check((await page.locator('.lb-row.me').count()) === 0, 'opting out removes me from the board at once');
+  /* a strength session inside a plan: the video player marks the plan session done */
+  const swId = await page.evaluate(async () => { const api = await import('/js/api.js'); const d = new Date();
+    const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    await api.enroll('road-to-hyrox', ymd, [0, 1, 2, 3, 4, 5, 6]); const plan = await api.activePlan();
+    return plan.sessions.find(s => s.template.category === 'strength').id; });
+  await page.goto(`${ORIGIN}/#/workout/${swId}`); await page.waitForSelector('a[href*="/play?sw="]');
+  check(/DRAF — perlu semakan coach/.test(await page.locator('#view').innerText()), 'draft plan sessions carry the coach-review mark');
+  await page.click('a[href*="/play?sw="]'); await page.waitForSelector('#sx'); await page.waitForTimeout(31000);
+  for (let i = 0; i < 80 && await page.locator('#sx').count(); i++) await page.click('[data-skip]');
+  await page.waitForSelector('[data-save]'); await page.click('[data-save]'); await page.waitForSelector('.str-done [data-share]');
+  const st = await page.evaluate(async id => (await (await import('/js/api.js')).getSession(id)).status, swId);
+  check(st === 'completed', `strength video from a plan marks that session completed (${st})`);
   libInPreview = supabaseLib;
   await page.click('.preview-bar button'); await page.waitForSelector('#auth-form'); check(true, 'exit preview returns to sign-in');
 } catch (e) { console.error(e.message); failed++; }

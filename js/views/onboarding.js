@@ -4,6 +4,8 @@ import * as api from '../api.js';
 import { state, go, loadRunner } from '../main.js';
 import { t, L, lang } from '../i18n.js';
 import { esc, on, photoFor, bg, today, ymd, parseYmd, weekdayShort, weekdayName, fmtDateLong, toast, friendlyError } from '../ui.js';
+import { recommend } from '../recommend.js';
+export { recommend };
 
 const GOALS = ['start', 'first_5k', 'improve_5k', 'first_10k', 'improve_10k', 'half', 'marathon', 'hyrox', 'fitness'];
 const EXPERIENCE = ['none', 'some', 'regular', 'experienced'];
@@ -141,20 +143,6 @@ function question(k) {
 
 /* ───────── recommendation ─────────
    Rule-based and deliberately conservative: when in doubt, the easier plan. */
-export function recommend(ans, programs) {
-  const cm = ans.continuous_run_min || 0, g = ans.goal;
-  let slug, note = '';
-  if (g === 'start' || g === 'fitness' || cm < 10) slug = 'couch-to-5k';
-  else if (g === 'first_5k') slug = 'road-to-5k';
-  else if (g === 'improve_5k') slug = cm >= 30 ? 'improve-5k' : 'road-to-5k';
-  else slug = cm >= 30 ? 'road-to-10k' : 'road-to-5k';
-  if (['half', 'marathon', 'hyrox'].includes(g)) note = t('ob.rec.notYet', { goal: t('goal.' + g) });
-  if (g === 'improve_10k' && slug === 'road-to-10k') note = t('ob.rec.improve10');
-  if (ans.has_limitations && slug !== 'couch-to-5k' && cm < 20) slug = 'couch-to-5k';
-  const pub = programs.filter(p => p.status === 'published' && p.tier === 'free');
-  const pick = pub.find(p => p.slug === slug) || null;
-  return { pick, others: pub.filter(p => p !== pick), note, wanted: slug };
-}
 const levelOf = ans => (ans.continuous_run_min || 0) >= 60 && ans.experience === 'experienced' ? 'advanced'
   : (ans.continuous_run_min || 0) >= 30 && ans.experience !== 'none' ? 'intermediate' : 'beginner';
 

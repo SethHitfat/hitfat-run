@@ -157,7 +157,7 @@ const PROGRAMS = [
 const q = v => v == null ? 'null' : typeof v === 'number' ? String(v) : `'${String(v).replace(/'/g, "''")}'`;
 const j = v => v == null ? 'null' : `${q(JSON.stringify(v))}::jsonb`;
 
-export { PROGRAMS };
+export { PROGRAMS, WARM, COOL, EASY_COACH, continuous, distanceRun, intervals, tempo, q, j };
 // Only print SQL when run directly, so preview.mjs can import the plans.
 if (import.meta.url === `file://${process.argv[1]}`) process.argv[2] === '--text' ? printTextSql() : printSql();
 

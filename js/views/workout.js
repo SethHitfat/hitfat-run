@@ -58,6 +58,8 @@ async function paint(body, id) {
     ${s.status === 'planned' ? `
       ${isRun ? `<button class="btn primary block" data-log>${icon('check', 'width="18" height="18"')} ${esc(t('wo.doneLog'))}</button>
         <button class="btn block" style="margin-top:10px" data-gps>${icon('gps', 'width="18" height="18"')} ${esc(t('wo.gps'))}</button>`
+        : tp.category === 'strength' && tp.steps?.[0]?.workout ? `<a class="btn primary block" href="#/strength/${esc(tp.steps[0].workout)}/play?sw=${s.id}">${icon('play', 'width="18" height="18"')} ${esc(t('wo.strengthGo'))}</a>
+          <button class="btn block" style="margin-top:10px" data-done>${esc(t('wo.markDone'))}</button>`
         : `<button class="btn primary block" data-done>${esc(t('wo.markDone'))}</button>`}
       <button class="btn ghost block" style="margin-top:10px" data-skip>${esc(t('wo.skip'))}</button>`
     : s.status === 'completed' ? `<div class="card">

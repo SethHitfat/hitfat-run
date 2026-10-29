@@ -49,7 +49,7 @@ select t.expect_error($q$ select run_enroll((select id from run_programs limit 1
 
 -- a running coach can read and edit drafts but cannot publish
 select t.as_user('00000000-0000-0000-0000-00000000000e');
-do $$ begin assert (select count(*) from run_programs) = 4, 'running coach cannot see drafts'; end $$;
+do $$ begin assert (select count(*) from run_programs) = 6, 'running coach cannot see the 4 plans in review and the 2 drafts'; end $$;
 select t.expect_error($q$ update run_programs set status = 'published' where slug = 'road-to-5k' $q$, '42501');
 
 -- the head coach publishes
@@ -59,6 +59,10 @@ do $$ begin assert (select count(*) from run_programs where status = 'published'
 
 -- ── 2. members read published content and enrol ──
 select t.as_user('00000000-0000-0000-0000-00000000000a');
+do $$ begin
+  assert (select count(*) from run_programs) = 4, 'member sees a draft plan';
+  assert not exists(select 1 from run_workout_templates t join run_programs p on p.id = t.program_id where p.slug in ('road-to-hyrox','road-to-21k')), 'member sees draft sessions';
+end $$;
 do $$ declare v uuid; n int; bad int; begin
   assert (select count(*) from run_workout_templates) = 87, 'member cannot read published workouts';
   v := run_enroll((select id from run_programs where slug = 'road-to-5k'), current_date, '{1,3,6}');

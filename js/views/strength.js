@@ -80,13 +80,13 @@ let P = null;   // the running session: { w, tl, idx, left, running, started, do
 const VOICE = 'hfrun_str_voice';
 const voiceOn = () => { try { return localStorage.getItem(VOICE) !== '0'; } catch (e) { return true; } };
 
-export async function play(view, key) {
+export async function play(view, key, params) {
   const w = byKey(key);
   if (!w) { go('strength', true); return; }
   stop();
   coach.unlock(); coach.setVoiceEnabled(voiceOn());
   const tl = timeline(w);
-  P = { w, tl, idx: 0, left: tl[0].sec * 1000, running: true, last: Date.now(), started: new Date(), spent: 0, done: new Set(), wake: null, timer: null, shown: null, cue: {} };
+  P = { sw: params?.get('sw') || null, w, tl, idx: 0, left: tl[0].sec * 1000, running: true, last: Date.now(), started: new Date(), spent: 0, done: new Set(), wake: null, timer: null, shown: null, cue: {} };
   view.innerHTML = `<div class="sx" id="sx">
     <div class="sx-top"><button class="sx-x" data-close aria-label="${esc(t('st.end'))}">✕</button>
       <div class="sx-prog">${tl.filter(s => s.kind === 'work').map(() => '<i></i>').join('')}</div>
@@ -195,7 +195,7 @@ function paint() {
 /* ───────── done ───────── */
 function finish(view, complete) {
   if (!P) return;
-  const { w, started, done } = P, secs = Math.round(P.spent / 1000), moves = done.size;
+  const { w, started, done, sw } = P, secs = Math.round(P.spent / 1000), moves = done.size;
   stop();
   if (complete) { coach.beep(3, true); coach.say(t('st.v.done')); }
   if (secs < 30) { toast(t('st.tooShort')); go('strength/' + w.key, true); return; }
@@ -220,6 +220,8 @@ function finish(view, complete) {
     e.target.disabled = true;
     try {
       const r = await api.saveStrength({ id: uuid(), workout_key: w.key, started_at: started.toISOString(), duration_s: Math.min(14400, secs), moves_done: moves, rpe });
+      // started from a plan session: that session is done too
+      if (sw) await api.updateSession(sw, { status: 'completed', completed_at: new Date().toISOString(), rpe }).catch(e => console.warn('plan session', e));
       toast(r.queued ? t('log.queued') : t('st.saved'));
       // saved: offer the share card, then back to the library
       e.target.remove(); root.querySelector('[data-discard]').remove(); root.querySelector('#fb-rpe').disabled = true;
