@@ -72,7 +72,7 @@ function rows(list, { showRuns = true, target = 0 } = {}) {
   return `<div class="lb">${list.map(r => `<div class="lb-row ${r.me ? 'me' : ''} ${r.rank <= 3 ? 'top top' + r.rank : ''}">
       <div class="lb-rank num">${r.rank}</div>
       <div class="grow ellipsis"><b>${esc(r.name)}</b>${r.me ? ` <span class="chip" style="margin-left:4px">${esc(t('lb.you'))}</span>` : ''}
-        ${showRuns ? `<div class="muted tiny">${esc(t('lb.runs', { n: r.runs }))}</div>` : r.done ? `<div class="tiny" style="color:var(--accent-text);font-weight:700">${esc(t('ch.finisher'))}</div>` : ''}</div>
+        ${showRuns ? `<div class="muted tiny">${esc(t(r.runs === 1 ? 'lb.run1' : 'lb.runs', { n: r.runs }))}</div>` : r.done ? `<div class="tiny" style="color:var(--accent-text);font-weight:700">${esc(t('ch.finisher'))}</div>` : ''}</div>
       <div class="num lb-km">${Number(r.km).toFixed(1)}<span>km</span></div></div>`).join('')}</div>`;
 }
 
