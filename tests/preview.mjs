@@ -68,7 +68,7 @@ try {
   await page.click('.run-go'); await page.click('#cd'); await page.waitForSelector('#gl');
   await page.waitForTimeout(33000); await shot('run-live');
   const liveKm = parseFloat(await page.locator('#gl-km').innerText()); check(liveKm > 0.005, `live distance grows (${liveKm} km)`);
-  check(/km daripada 6/.test(await page.locator('#gl-unit').innerText()), 'goal shown under the distance');
+  check(/km daripada 6/i.test(await page.locator('#gl-unit').innerText()), 'goal shown under the distance');
   await page.click('[data-pause]'); await page.waitForSelector('#gl-paused:not(.hide)');
   const box = await page.locator('[data-end]').boundingBox(); await page.mouse.move(box.x + 20, box.y + 20); await page.mouse.down(); await page.waitForTimeout(1300); await page.mouse.up();
   await page.waitForSelector('#log-form'); const d = parseFloat(await page.locator('#lf-dist').inputValue());
@@ -79,7 +79,7 @@ try {
   await page.waitForFunction(() => (document.querySelector('#sh-img')?.src || '').startsWith('data:image'));
   check(await page.locator('#sh-hide').isChecked(), 'share hides the start and end of the route by default');
   await page.keyboard.press('Escape');
-  check(/Kad hidrasi/.test(await page.locator('#view').innerText()) && /Dirancang sebelum lari/.test(await page.locator('#view').innerText()), 'saved GPS run shows its hydration card with the plan made at the start');
+  check(/Kad hidrasi/i.test(await page.locator('#view').innerText()) && /Dirancang sebelum lari/i.test(await page.locator('#view').innerText()), 'saved GPS run shows its hydration card with the plan made at the start');
   await page.click('#view [data-share]'); await page.waitForFunction(() => (document.querySelector('#sh-img')?.src || '').startsWith('data:image'));
   await page.click('[data-format=post]'); await page.waitForTimeout(400); await shot('share-sheet');
   await page.keyboard.press('Escape');
@@ -132,7 +132,7 @@ try {
   /* running weather on Home */
   await page.waitForSelector('.wx'); await page.evaluate(() => window.scrollTo(0, 0)); await shot('weather');
   check(/Berhati-hati/i.test(await page.locator('.wx-chip').innerText()), 'weather card: 31 °C 70% shows Berhati-hati');
-  check(/Waktu terbaik/.test(await page.locator('.wx').innerText()) && !/^(21[:.]00|0?9[:.]00 PTG|0?9[:.]00 PM)/i.test(await page.locator('.wx-best b').innerText()), 'best hour shown, never a window starting at 21:00');
+  check(/Waktu terbaik/i.test(await page.locator('.wx').innerText()) && !/^(21[:.]00|0?9[:.]00 PTG|0?9[:.]00 PM)/i.test(await page.locator('.wx-best b').innerText()), 'best hour shown, never a window starting at 21:00');
   const calls = wxCalls; await page.click('[data-tab=club]'); await page.click('[data-tab=home]'); await page.waitForSelector('.wx');
   check(wxCalls === calls, 'weather cached: no second request within 30 minutes');
   await page.evaluate(() => localStorage.removeItem('hfrun_wx')); await ctx.setOffline(true);
@@ -141,7 +141,7 @@ try {
   /* guided sweat test, then the planner uses it */
   await page.goto(`${ORIGIN}/#/sweat`); await page.waitForSelector('#sw-before');
   await page.fill('#sw-before', '70,4'); await page.click('#sw1 [type=submit]'); await page.waitForSelector('#sw-after');
-  check(/70.4 kg/.test(await page.locator('#view').innerText()), 'sweat test: weight before kept (comma accepted)');
+  check(/70.4 kg/i.test(await page.locator('#view').innerText()), 'sweat test: weight before kept (comma accepted)');
   await page.fill('#sw-after', '69.6'); await page.fill('#sw-drunk', '300'); await page.fill('#sw-min', '50'); await page.click('#sw3 [type=submit]');
   await page.waitForSelector('.sw-result'); await shot('sweat-result');
   check(/1\.32/.test(await page.locator('.sw-result').innerText()), 'sweat rate 1.32 L/h from (0.8 kg + 0.3 L) in 50 min');

@@ -10,6 +10,7 @@ import * as coach from '../voice.js';
 import { GPS_DRAFT } from './log.js';
 import { hydrationPlanner } from './hydration-card.js';
 import { keepPlan } from '../hydration.js';
+import { lanes, chevrons } from '../brand.js';
 
 const PREFS = 'hfrun_runprefs';
 const prefs = (() => { try { return { mode: 'free', km: 5, min: 30, voice: true, autoPause: false, ...JSON.parse(localStorage.getItem(PREFS) || '{}') }; } catch (e) { return { mode: 'free', km: 5, min: 30, voice: true, autoPause: false }; } })();
@@ -56,7 +57,7 @@ function start(view, session) {
     <div class="seg" style="margin-top:16px" role="group">${modes.map(([k, l]) => `<button data-mode="${k}" aria-pressed="${prefs.mode === k}">${esc(l)}</button>`).join('')}</div>
     <div class="run-goal" id="goal"></div>
     <div id="hyd" style="margin:4px 0 18px"></div>
-    <button class="run-go" data-start ${supported ? '' : 'disabled'}>${esc(t('run.start'))}</button>
+    <button class="run-go" data-start ${supported ? '' : 'disabled'}><span>${esc(t('run.start'))}</span>${chevrons(14)}</button>
     <div class="run-opts">
       <label class="row"><input type="checkbox" data-pref="voice" ${prefs.voice ? 'checked' : ''}><span>${esc(t('run.voice'))}</span></label>
       <label class="row"><input type="checkbox" data-pref="autoPause" ${prefs.autoPause ? 'checked' : ''}><span>${esc(t('run.autoPause'))}</span></label>
@@ -108,7 +109,7 @@ function start(view, session) {
       el.className = 'acc ' + (acc <= 15 ? 'good' : acc <= ACC_MAX ? 'ok' : 'bad');
       el.querySelector('span').textContent = t('gps.accuracy', { m: Math.round(acc) });
       const pt = [p.coords.latitude, p.coords.longitude];
-      if (!preMap._me) { preMap._me = L.circleMarker(pt, { radius: 8, color: '#000', weight: 3, fillColor: '#FFE000', fillOpacity: 1 }).addTo(preMap); preMap.setView(pt, 16, { animate: false }); }
+      if (!preMap._me) { preMap._me = L.circleMarker(pt, { radius: 8, color: '#111310', weight: 3, fillColor: '#E2FF63', fillOpacity: 1 }).addTo(preMap); preMap.setView(pt, 16, { animate: false }); }
       else preMap._me.setLatLng(pt);
     }, () => { const el = root.querySelector('#pre-acc'); if (el) { el.className = 'acc bad'; el.querySelector('span').textContent = t('gps.denied'); } },
     { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
@@ -153,7 +154,7 @@ function countdown(view, done) {
 }
 
 function live(view) {
-  view.innerHTML = `<div class="gps-live" id="gl">
+  view.innerHTML = `<div class="gps-live" id="gl">${lanes()}
     <div class="row between"><span class="acc" id="gl-acc"><i></i><span>${esc(t('gps.searching'))}</span></span>
       <span class="tiny" style="font-weight:800;letter-spacing:.1em" id="gl-state"></span>
       <button class="tiny" style="font-weight:800;color:var(--accent)" data-map>${esc(t('gps.map'))}</button></div>
@@ -249,13 +250,13 @@ function paintLive() {
   acc.className = 'acc ' + (tracker.error === 1 || stale ? 'bad' : f.acc <= 15 ? 'good' : f.acc <= ACC_MAX ? 'ok' : 'bad');
   acc.querySelector('span').textContent = tracker.error === 1 ? t('gps.denied') : stale ? t('gps.searching') : t('gps.accuracy', { m: Math.round(f.acc) });
   el.querySelector('#gl-hint').textContent = s.status === 'paused' ? t('gps.holdEnd') : tracker.error === 1 ? t('gps.deniedHelp') : '';
-  if (map && f) { line.setLatLngs(s.pts); me ? me.setLatLng(f.pt) : (me = window.L.circleMarker(f.pt, { radius: 8, color: '#000', weight: 3, fillColor: '#FFE000', fillOpacity: 1 }).addTo(map)); }
+  if (map && f) { line.setLatLngs(s.pts); me ? me.setLatLng(f.pt) : (me = window.L.circleMarker(f.pt, { radius: 8, color: '#111310', weight: 3, fillColor: '#E2FF63', fillOpacity: 1 }).addTo(map)); }
 }
 async function toggleMap(root) {
   const box = root.querySelector('#gl-map'); box.classList.toggle('hide');
   root.querySelector('.main').classList.toggle('compact', !box.classList.contains('hide'));
   if (box.classList.contains('hide') || map) { map && map.invalidateSize(); return; }
-  try { const L = await loadLeaflet(); map = baseMap(L, box, true); line = L.polyline(tracker.s.pts, { color: '#FFE000', weight: 5 }).addTo(map);
+  try { const L = await loadLeaflet(); map = baseMap(L, box, true); line = L.polyline(tracker.s.pts, { color: '#E2FF63', weight: 5 }).addTo(map);
     if (tracker.lastFix) map.setView(tracker.lastFix.pt, 16, { animate: false }); }
   catch (e) { box.classList.add('hide'); toast(t('gps.noMap')); }
 }

@@ -1,12 +1,12 @@
 /* Shared by privacy.html and terms.html */
-:root{ --bg:#fff; --surface:#F4F4F4; --line:#E2E2E2; --text:#111; --muted:#5F5F5F; --link:#7A6A00; --accent:#111; }
-@media (prefers-color-scheme: dark){ :root{ --bg:#000; --surface:#0E0E0E; --line:#262626; --text:#fff; --muted:#9A9A9A; --link:#FFE000; --accent:#FFE000; } }
+:root{ --bg:#fff; --surface:#F3F5EC; --line:#DEE2D3; --text:#111310; --muted:#5C6155; --link:#4E5E00; }
+@media (prefers-color-scheme: dark){ :root{ --bg:#111310; --surface:#1A1D18; --line:#30352B; --text:#fff; --muted:#A3A99A; --link:#E2FF63; } }
 *{ box-sizing:border-box; margin:0; padding:0; }
 body{ background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; line-height:1.65; }
 .wrap{ max-width:720px; margin:0 auto; padding:32px 16px 80px; }
-.brand{ font-family:Oswald,"Arial Narrow",sans-serif; font-weight:700; font-size:20px; letter-spacing:.04em; display:block; color:var(--text); text-decoration:none; }
-.brand b{ background:#FFE000; color:#141000; padding:0 4px; border-radius:4px; }
-h1{ font-family:Oswald,"Arial Narrow",sans-serif; font-size:34px; text-transform:uppercase; line-height:1.05; margin-bottom:8px; }
+.brand{ font-family:"Fira Sans Extra Condensed","Arial Narrow",sans-serif; font-weight:900; font-style:italic; font-size:22px; letter-spacing:.01em; display:block; color:var(--text); text-decoration:none; }
+.brand b{ background:#E2FF63; color:#111310; padding:0 5px; border-radius:4px; }
+h1{ font-family:"Fira Sans Extra Condensed","Arial Narrow",sans-serif; font-weight:800; font-size:40px; text-transform:uppercase; line-height:1.05; margin-bottom:8px; }
 h2{ font-size:18px; font-weight:800; margin:30px 0 10px; }
 .upd{ color:var(--muted); font-size:13px; margin-bottom:26px; }
 p,li{ font-size:15px; margin-bottom:11px; }
@@ -21,7 +21,7 @@ th{ color:var(--muted); font-size:11px; letter-spacing:1px; text-transform:upper
 .top{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:26px; }
 .lang{ display:flex; background:var(--surface); border-radius:999px; padding:3px; }
 .lang button{ font:700 13px Inter,sans-serif; border:0; background:none; color:var(--muted); padding:7px 14px; border-radius:999px; cursor:pointer; }
-.lang button[aria-pressed="true"]{ background:#FFE000; color:#141000; }
+.lang button[aria-pressed="true"]{ background:#E2FF63; color:#111310; }
 [hidden]{ display:none !important; }
 /* BM first even before legal.js runs; it switches html[lang] */
 section[lang="en"]{ display:none; } html[lang="en"] section[lang="en"]{ display:block; } html[lang="en"] section[lang="ms"]{ display:none; }

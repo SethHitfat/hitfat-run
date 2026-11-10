@@ -37,9 +37,9 @@ export function challengeCard(c, { n = 0, joined = false, mine = 0 } = {}) {
   </div></a>`;
 }
 export const medalSvg = (size = 140) => `<svg class="medal" width="${size}" height="${size}" viewBox="0 0 120 120" aria-hidden="true">
-  <path d="M38 4h16l12 30H50zM82 4H66L54 34h16z" fill="#FFE000" opacity=".85"/>
-  <circle cx="60" cy="72" r="40" fill="#FFE000"/><circle cx="60" cy="72" r="31" fill="none" stroke="#141000" stroke-width="3" opacity=".35"/>
-  <path d="M60 50l6.5 13.2 14.5 2.1-10.5 10.2 2.5 14.5L60 83.2 47 90l2.5-14.5L39 65.3l14.5-2.1z" fill="#141000"/></svg>`;
+  <path d="M38 4h16l12 30H50zM82 4H66L54 34h16z" fill="#E2FF63" opacity=".85"/>
+  <circle cx="60" cy="72" r="40" fill="#E2FF63"/><circle cx="60" cy="72" r="31" fill="none" stroke="#111310" stroke-width="3" opacity=".35"/>
+  <path d="M60 50l6.5 13.2 14.5 2.1-10.5 10.2 2.5 14.5L60 83.2 47 90l2.5-14.5L39 65.3l14.5-2.1z" fill="#111310"/></svg>`;
 
 /* ───────── opt-in ───────── */
 export function optInSheet(onDone) {
@@ -93,7 +93,7 @@ export async function render(view) {
     catch (e) { body.innerHTML = errorBox(e, true); body.querySelector('[data-retry]').onclick = paint; return; }
     const me = list.find(r => r.me);
     const root = mount(body, `
-      ${optedIn() ? '' : `<div class="card lb-cta"><div class="eyebrow">${esc(t('lb.optEyebrow'))}</div>
+      ${optedIn() ? '' : `<div class="card lb-cta lime"><div class="eyebrow">${esc(t('lb.optEyebrow'))}</div>
         <div style="font-weight:800;font-size:20px;margin:4px 0 6px">${esc(t('lb.ctaT'))}</div><p class="muted small" style="margin:0 0 12px">${esc(t('lb.cta'))}</p>
         <button class="btn primary" data-join>${esc(t('lb.join'))}</button></div>`}
       <div class="seg" role="group" style="margin-top:14px"><button data-period="week" aria-pressed="${LB.period === 'week'}">${esc(t('lb.week'))}</button><button data-period="month" aria-pressed="${LB.period === 'month'}">${esc(t('lb.month'))}</button></div>
@@ -130,7 +130,7 @@ export async function challenge(view, id) {
         <h1 style="margin:6px 0 4px;font-size:36px">${esc(L(c.i18n).title)}</h1>
         <div class="num" style="font-size:56px">${km(c.target_m, 0)}<span class="small" style="font-family:var(--font);margin-left:8px">km</span></div></div></div>
       ${L(c.i18n).desc ? `<p style="margin:18px 0 0;font-size:16px;line-height:1.5">${esc(L(c.i18n).desc)}</p>` : ''}
-      ${joined ? `<div class="card ch-progress" style="margin-top:16px">
+      ${joined ? `<div class="card ch-progress ${done ? 'lime' : ''}" style="margin-top:16px">
           ${done ? `<div class="ch-medal">${medalSvg(120)}<div><div class="eyebrow">${esc(t('ch.finisher'))}</div><div style="font-weight:900;font-size:22px">${esc(t('ch.doneT'))}</div></div></div>` : ''}
           <div class="row between" style="align-items:flex-end"><div><div class="eyebrow">${esc(t('ch.progress'))}</div>
             <div class="num" style="font-size:52px">${km(m, 1)}<span class="small" style="font-family:var(--font);color:var(--muted)"> / ${km(c.target_m, 0)} km</span></div></div>

@@ -104,7 +104,7 @@ async function after(body, draft) {
 function result(body, test, offWindow) {
   const avg = measuredRate();
   body.innerHTML = `<div>${steps(4)}
-    <div class="card sw-result" style="margin-top:16px"><div class="eyebrow">${esc(t('sw.yourRate'))}</div>
+    <div class="card sw-result lime" style="margin-top:16px"><div class="eyebrow">${esc(t('sw.yourRate'))}</div>
       <div class="num" style="font-size:72px;color:var(--accent-text)">${test.rate.toFixed(2)}<span class="small" style="font-family:var(--font);color:var(--muted)"> ${esc(t('sw.lph'))}</span></div>
       <p class="muted small" style="margin:6px 0 0">${esc(t('sw.explain', { b: test.before.toFixed(1), a: test.after.toFixed(1), d: test.drunk_ml, m: test.minutes }))}</p>
       ${offWindow ? `<p class="small" style="margin:8px 0 0">${esc(t('sw.offWindow'))}</p>` : ''}

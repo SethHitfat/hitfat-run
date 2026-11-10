@@ -109,9 +109,11 @@ export function baseMap(L, el, interactive = true) {
 }
 export async function drawRoute(el, route) {
   const L = await loadLeaflet(), m = baseMap(L, el, true);
-  const line = L.polyline(route, { color: '#E30613', weight: 5 }).addTo(m);
-  L.circleMarker(route[0], { radius: 6, color: '#fff', weight: 2, fillColor: '#137F3B', fillOpacity: 1 }).addTo(m);
-  L.circleMarker(route[route.length - 1], { radius: 6, color: '#fff', weight: 2, fillColor: '#E30613', fillOpacity: 1 }).addTo(m);
+  // HITFAT neon over a dark casing, so the line reads on light and dark tiles
+  L.polyline(route, { color: '#111310', weight: 9, opacity: .85 }).addTo(m);
+  const line = L.polyline(route, { color: '#E2FF63', weight: 5 }).addTo(m);
+  L.circleMarker(route[0], { radius: 6, color: '#111310', weight: 3, fillColor: '#fff', fillOpacity: 1 }).addTo(m);
+  L.circleMarker(route[route.length - 1], { radius: 7, color: '#111310', weight: 3, fillColor: '#E2FF63', fillOpacity: 1 }).addTo(m);
   m.fitBounds(line.getBounds(), { padding: [20, 20] });
   return m;
 }

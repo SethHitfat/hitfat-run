@@ -1,16 +1,19 @@
 import * as api from '../api.js';
 import { t, setLang, lang } from '../i18n.js';
-import { esc, on, bg, CLUB_PHOTO } from '../ui.js';
+import { esc, on } from '../ui.js';
+import { logo, lanes } from '../brand.js';
 
 let mode = 'signin';
 export function render(view) {
   view.innerHTML = `<section class="auth" style="padding-top:0;justify-content:flex-start">
-    <div class="photo auth-hero" ${bg(CLUB_PHOTO, 'display:flex;flex-direction:column;justify-content:space-between')}>
-      <div class="row between"><div class="wordmark" style="color:#fff">HITFAT <b>RUN</b> CLUB</div>
-        <div class="seg" style="width:120px;background:rgba(0,0,0,.45)" role="group" aria-label="${esc(t('settings.language'))}">
+    <div class="brand-hero">${lanes()}
+      <div class="row between"><div class="brand-mini">HITFAT RUN CLUB</div>
+        <div class="seg" style="width:120px" role="group" aria-label="${esc(t('settings.language'))}">
           <button data-lang="ms" aria-pressed="${lang() === 'ms'}">BM</button><button data-lang="en" aria-pressed="${lang() === 'en'}">EN</button></div></div>
-      <div><p class="tag">${esc(t('auth.tag1'))}<br><b>${esc(t('auth.tag2'))}</b></p>
-        <p class="muted" style="font-size:16px;max-width:30em;margin:12px 0 0">${esc(t('auth.pitch'))}</p></div>
+      ${logo(124, '#111310')}
+      <h1 class="brand-name">HITFAT<br>RUN CLUB</h1>
+      <div class="brand-slogan">${esc(t('auth.tag1'))} ${esc(t('auth.tag2'))}</div>
+      <p class="muted" style="font-size:15px;max-width:30em;margin:10px 0 0">${esc(t('auth.slogan'))} ${esc(t('auth.pitch'))}</p>
     </div>
     <div style="margin-top:24px">
       <button class="btn dark block" data-google>${googleMark} ${esc(t('auth.google'))}</button>

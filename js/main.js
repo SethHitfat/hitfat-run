@@ -1,6 +1,7 @@
 // Boot, auth gate, hash router and the tab bar.
 import * as api from './api.js';
 import { setSweatOwner } from './hydration.js';
+import { logo } from './brand.js';
 import { t, setLang, lang } from './i18n.js';
 import { $, esc, icon, toast, closeSheet, errorBox } from './ui.js';
 
@@ -47,7 +48,7 @@ export function back(fallback) { if (history.length > 1) history.back(); else go
 
 function paintTabs(current) {
   const nav = $('#tabs');
-  nav.innerHTML = `<div class="wordmark">HITFAT <b>RUN</b></div>` + TABS.map(([k, ic]) =>
+  nav.innerHTML = `<div class="wordmark">${logo(30)}<span>HITFAT <b>RUN</b></span></div>` + TABS.map(([k, ic]) =>
     `<button data-tab="${k}" ${k === 'run' ? 'class="run-tab"' : ''} ${current === k ? 'aria-current="page"' : ''}>${k === 'run' ? `<span class="dot">${icon(ic)}</span>` : icon(ic)}<span>${esc(t('tab.' + k))}</span></button>`).join('');
   nav.classList.remove('hide');
 }

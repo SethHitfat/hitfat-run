@@ -35,7 +35,7 @@ export async function render(view) {
   let logs = [];
   try { logs = await api.listStrength(); } catch (e) { console.warn(e); }
   const n = weekCount(logs);
-  const root = mount(body, `<div class="card str-hero">
+  const root = mount(body, `<div class="card str-hero lime">
       <div class="ring" style="--p:${Math.min(1, n / WEEK_TARGET) * 100}"><div><b class="num">${n}</b><span>/${WEEK_TARGET}</span></div></div>
       <div><div class="eyebrow">${esc(t('st.thisWeek'))}</div><div style="font-weight:800;font-size:18px;margin-top:4px">${esc(n >= WEEK_TARGET ? t('st.weekDone') : t('st.weekGoal', { n: WEEK_TARGET }))}</div>
       <div class="muted small" style="margin-top:4px">${esc(t('st.why'))}</div></div></div>
